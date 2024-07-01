@@ -29,27 +29,33 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="header-title">
-                            <h4 class="card-title"><%= pageHeader %></h4>
+                            <h4 class="card-title"><%=pageHeader%></h4>
                             <p style="margin-top: 20px;color: green;font-weight: bold;"><%=msg%></p>
+
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="new-user-info">
-                            <form action="/admin/dashboard/insert" method="post">
+                            <form method="post" action="/admin/dashboard/update/<%=type%>">
                                 <div class="row">
-                                    <input type="hidden" name="type" value="<%=name%>">
                                     <% columns.forEach(column => { %>
-
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="<%= column %>"><%= column.charAt(0).toUpperCase() + column.slice(1) %>:</label>
-                                            <input type="text" class="form-control" id="<%= column %>" name="<%= column %>" required placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>">
+                                            <input 
+                                                type="text" 
+                                                class="form-control" 
+                                                id="<%= column %>" 
+                                                name="<%= column %>" 
+                                                value="<%= data[column] %>" 
+                                                <%= column === 'id' ? 'readonly' : 'required' %> 
+                                                placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>"
+                                            >
                                         </div>
                                     <% }) %>
+                                    
                                 </div>
                                 <hr>
-                               
-                               
-                                <button type="submit" class="btn btn-primary">Add <%=buttonContent%></button>
+                                <button type="submit" class="btn btn-primary">Update</button>
                             </form>
                         </div>
                     </div>

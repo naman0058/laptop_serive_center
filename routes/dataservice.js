@@ -17,12 +17,13 @@ function generatePageHeader(name, status) {
       'slccall/closed': 'SLC Closed Call',
       'cccall/open': 'CC OPEN Call',
       'cccall/closed': 'CC Closed Call',
-      'vendor/all': 'Vendor List',
-      'part/all' : 'Parts List',
+      'vendor/open': 'Vendor List',
+      'part/open' : 'Parts List',
       'part/new' : 'New Parts',
       'vendor/new' : 'New Vendor',
       'slccall/new' : 'New SLC Call',
       'cccall/new' : 'New CC Call',
+      'cccall/2': 'Update CC Call'
 
 
 
@@ -42,21 +43,49 @@ function generatePageHeader(name, status) {
       'slccall/closed': 'New SLC Call',
       'cccall/open': 'New CC Call',
       'cccall/closed': 'New CC Call',
-      'vendor/all': 'New Vendor',
-      'part/all' : 'New Parts',
+      'vendor/open': 'New Vendor',
+      'part/open' : 'New Parts',
       'part/new' : 'New Parts',
       'vendor/new' : 'New Vendor',
       'slccall/new' : 'New SLC Call',
       'cccall/new' : 'New CC Call',
+      'cccall/2': 'Update CC Call'
+
 
 
 
 
       // Add more mappings as needed
     };
+
+
+
     
     const key = `${name}/${status}`;
+    console.log('e',key)
     return headerMappings[key] || `${name} ${status}`; // Default header if no mapping found
+  }
+
+
+
+
+  function generateUpdateContent(name, status) {
+    const headerMappings = {
+      'slccall': 'Update SLC Call',
+      'cccall': 'Update CC Call',
+      'vendor': 'Update Vendor',
+      'part' : 'Update Parts',
+      
+
+      // Add more mappings as needed
+    };
+
+
+    
+    
+    const key = `${name}`;
+    console.log('e',key)
+    return headerMappings[key] || `${name}`; // Default header if no mapping found
   }
 
 
@@ -82,20 +111,20 @@ router.get('/new/:name', verify.adminAuthenticationToken, (req, res) => {
     let pageHeader = generatePageHeader(req.params.name, 'new');
     let buttonContent = generateButtonContent(req.params.name, 'new');
 
-    console.log('opa',pageHeader)
 
     pool.query(`SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '${req.params.name}'`, (err, columns) => {
         if (err) {
             throw err;
         } else {
             const columnNames = columns.map(column => column.COLUMN_NAME)
-                                       .filter(name => !['status', 'created_at', 'id'].includes(name));
+                                       .filter(name => !['status', 'created_at', 'id' , 'updated_at', 'assign_engineer', 'type'].includes(name));
 
             res.render('add', {
                 columns: columnNames,
                 name: req.params.name,
                 pageHeader,
-                buttonContent
+                buttonContent,
+                msg:req.query.message
             });
         }
     });
@@ -117,20 +146,17 @@ router.get('/new/:name', verify.adminAuthenticationToken, (req, res) => {
 
 
 
-router.post('/:name/insert',verify.adminAuthenticationToken, upload.single('image'), async (req, res) => {
+router.post('/insert',verify.adminAuthenticationToken, upload.single('image'), async (req, res) => {
     const { body, params, file } = req;
-    const { name } = params;
+    // const { name } = params;
 
     try {
         body.created_at = verify.getCurrentDate();
-        body.status = true;
         body.updated_at = verify.getCurrentDate();
-        if (isimage.includes(name)) {
-            body.image = file.filename;
-        }
+        body.status = 'open'
 
-        await queryAsync(`INSERT INTO ${databasetable} SET ?`, body);
-        res.redirect(`/admin/dashboard/outlet/${encodeURIComponent(name)}?message=${encodeURIComponent('Saved Successfully')}`);
+        await queryAsync(`INSERT INTO ${req.body.type} SET ?`, body);
+        res.redirect(`/admin/dashboard/new/${encodeURIComponent(req.body.type)}?message=${encodeURIComponent('Saved Successfully')}`);
     } catch (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
@@ -143,14 +169,17 @@ router.post('/:name/insert',verify.adminAuthenticationToken, upload.single('imag
 
 
 
-router.get('/:name/delete',verify.adminAuthenticationToken, async (req, res) => {
-    const { id } = req.query;
-    const { name } = req.params;
-    const update = verify.getCurrentDate()
+router.get('/delete', verify.adminAuthenticationToken, async (req, res) => {
+    const { type, id } = req.query;
+
+    if (!type || !id) {
+        return res.status(400).send('Bad Request');
+    }
 
     try {
-        await queryAsync(`UPDATE ${databasetable} SET status = false , updated_at = ? WHERE id = ?`, [update,id]);
-        res.redirect(`/admin/dashboard/outlet/${encodeURIComponent(name)}/list`);
+        const sql = `DELETE FROM ?? WHERE id = ?`;
+        await queryAsync(sql, [type, id]);
+        res.json({ msg: 'success' });
     } catch (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
@@ -158,19 +187,37 @@ router.get('/:name/delete',verify.adminAuthenticationToken, async (req, res) => 
 });
 
 
+router.get('/update/:type/:id', verify.adminAuthenticationToken, async (req, res) => {
+    const {  message } = req.query;
+    const { type, id } = req.params;
 
-
-router.get('/:name/update', verify.adminAuthenticationToken, async (req, res) => {
-    const { name } = req.params;
-    const { id } = req.query;
+    if (!type || !id) {
+        return res.status(400).send('Bad Request');
+    }
 
     try {
-        const result = await queryAsync(`SELECT * FROM ${databasetable} WHERE id = ?`, [id]);
-        const response = { name };
-        if (isimage.includes(name)) {
-            response.isimage = true;
-        }
-        res.render(`${folder}/update`, { response, msg: req.query.message, result });
+        let pageHeader = generateUpdateContent(type, id);
+        let buttonContent = generateUpdateContent(type, id,);
+
+        // Fetch column names
+        const columnQuery = 'SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ?';
+        const columns = await queryAsync(columnQuery, [type]);
+        const columnNames = columns.map(column => column.COLUMN_NAME)
+                                   .filter(column => !['status', 'created_at', 'updated_at', 'assign_engineer', 'type'].includes(column));
+
+        // Fetch the existing data for the specified id
+        const dataQuery = `SELECT * FROM ?? WHERE id = ?`;
+        const [data] = await queryAsync(dataQuery, [type, id]);
+
+        res.render('update', {
+            columns: columnNames,
+            data,
+            type,
+            id,
+            pageHeader,
+            buttonContent,
+            msg: message
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
@@ -180,9 +227,13 @@ router.get('/:name/update', verify.adminAuthenticationToken, async (req, res) =>
 
 
 
-router.post('/:name/update', verify.adminAuthenticationToken, upload.single('image'), async (req, res) => {
+
+
+
+
+router.post('/update/:type', verify.adminAuthenticationToken, upload.single('image'), async (req, res) => {
     const { body, params, file } = req;
-    const { name } = params;
+    const { type } = params;
 
     try {
         body.updated_at = verify.getCurrentDate();
@@ -191,8 +242,8 @@ router.post('/:name/update', verify.adminAuthenticationToken, upload.single('ima
             body.image = file.filename;
         }
 
-        await queryAsync(`UPDATE ${databasetable} SET ? WHERE id = ?`, [body, body.id]);
-        res.redirect(`/admin/dashboard/outlet/${encodeURIComponent(name)}/update?id=${encodeURIComponent(body.id)}&message=${encodeURIComponent('Updated Successfully')}`);
+        await queryAsync(`UPDATE ${type} SET ? WHERE id = ?`, [body, body.id]);
+        res.redirect(`/admin/dashboard/update/${encodeURIComponent(type)}/${encodeURIComponent(body.id)}?message=${encodeURIComponent('Updated Successfully')}`);
     } catch (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');

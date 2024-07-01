@@ -25,6 +25,7 @@
                 <div class="card-header d-flex justify-content-between">
                     <div class="header-title">
                         <h4 class="card-title"><%= pageHeader %></h4>
+                        <input type="hidden" id="type" value="<%=name%>">
                     </div>
                    <a href="/admin/dashboard/new/<%=name %>"> <button type="button" class="btn btn-primary" style="float: right;"><%= buttonContent %> </button></a>
                 </div>
@@ -38,7 +39,7 @@
                                     <tr>
                                         <% if (result.length > 0) { %>
                                             <% Object.keys(result[0]).forEach(key => { %>
-                                                <% if (key !== 'status') { %>
+                                                <% if (key !== 'status' || key !== 'type') { %>
                                                     <th><%= key.charAt(0).toUpperCase() + key.slice(1) %></th>
                                                 <% } %>
                                             <% }) %>
@@ -50,12 +51,13 @@
                                     <% result.forEach(item => { %>
                                         <tr>
                                             <% Object.entries(item).forEach(([key, value]) => { %>
-                                                <% if (key !== 'status') { %>
+                                                <% if (key !== 'status' || key !== 'type') { %>
+
                                                     <td><%= value %></td>
                                                 <% } %>
                                             <% }) %>
                                             <td>
-                                                <button class="btn btn-primary" onclick="editItem(<%= item.id %>)">Edit</button>
+                                              <a href="/admin/dashboard/update/<%=name%>/<%=item.id%>" style="color: white;">  <button class="btn btn-primary" style="color: white;">Edit</a></button>
                                                 <button class="btn btn-danger" onclick="deleteItem(<%= item.id %>)">Delete</button>
                                             </td>
                                         </tr>
@@ -65,7 +67,8 @@
                                     <tr>
                                         <% if (result.length > 0) { %>
                                             <% Object.keys(result[0]).forEach(key => { %>
-                                                <% if (key !== 'status') { %>
+                                                <% if (key !== 'status' || key !== 'type') { %>
+
                                                     <th title="<%= key.charAt(0).toUpperCase() + key.slice(1) %>"><%= key.charAt(0).toUpperCase() + key.slice(1) %></th>
                                                 <% } %>
                                             <% }) %>
@@ -91,7 +94,16 @@
     }
 
     function deleteItem(id) {
+        let type = $('#type').val()
         // Implement delete functionality here
-        console.log('Delete item with id:', id);
+        $.getJSON('/admin/dashboard/delete',{type,id},data=>{
+            if(data.msg=='success'){
+                window.location.reload()
+
+            }
+            else{
+                alert('An Error Occured Please Try Again Later.')
+            }
+        })
     }
 </script>
