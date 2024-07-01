@@ -37,12 +37,21 @@
                         <div class="new-user-info">
                             <form action="/admin/dashboard/insert" method="post">
                                 <div class="row">
-                                    <input type="hidden" name="type" value="<%=name%>">
+                                    <input type="hidden" name="type" id="type" value="<%=name%>">
                                     <% columns.forEach(column => { %>
-
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="<%= column %>"><%= column.charAt(0).toUpperCase() + column.slice(1) %>:</label>
-                                            <input type="text" class="form-control" id="<%= column %>" name="<%= column %>" required placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>">
+                                            <input 
+                                                type="text" 
+                                                class="form-control" 
+                                                id="<%= column %>" 
+                                                name="<%= column %>" 
+                                                <%= column === 'pincode' ? "onchange=fetchLocation()" : '' %> 
+                                                <%= column === 'number' ? "onchange=fetchDataByNumber()" : '' %> 
+                                                placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>" 
+                                                <%= (column === 'city' || column === 'district' || column === 'tss_order_no') ? 'readonly required' : '' %>
+                                                <%= column !== 'alternate_number' && column !== 'email' && column !== 'address' && column !== 'product' && column !== 'model' && column !== 'tss_order_no' ? 'required' : '' %>
+                                            >
                                         </div>
                                     <% }) %>
                                 </div>
@@ -60,3 +69,93 @@
 </div>
 <!-- Footer Section Start -->
 <%- include('./footer.ejs') %>
+
+
+<script>
+    function fetchLocation() {
+        const pincode = document.getElementById('pincode').value;
+        const cityField = document.getElementById('city');
+        const districtField = document.getElementById('district');
+
+        if (pincode) {
+            fetch(`https://api.postalpincode.in/pincode/${pincode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data[0].Status === "Success") {
+                        const postOffice = data[0].PostOffice[0];
+                        cityField.value = postOffice.District;
+                        districtField.value = postOffice.State;
+                    } else {
+                        cityField.value = '';
+                        districtField.value = '';
+                    }
+                    // enforceAttributes(cityField, districtField);
+                })
+                .catch(error => {
+                    console.error('Error fetching location:', error);
+                    cityField.value = '';
+                    districtField.value = '';
+                    enforceAttributes(cityField, districtField);
+                });
+        }
+    }
+
+    function fetchDataByNumber() {
+        const number = document.getElementById('number').value;
+        const type =   document.getElementById('type').value;
+
+        if (number) {
+            fetch(`/admin/dashboard/fetchnumber/${number}/${type}`) // Replace with your actual API endpoint
+                .then(response => response.json())
+                .then(data => {
+                    if (data.found) {
+                        document.getElementById('alternate_number').value = data.alternate_number || '';
+                        document.getElementById('email').value = data.email || '';
+                        document.getElementById('address').value = data.address || '';
+                        document.getElementById('product').value = data.product || '';
+                        document.getElementById('model').value = data.model || '';
+                    } else {
+                        clearOptionalFields();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    clearOptionalFields();
+                });
+        }
+    }
+
+    function clearOptionalFields() {
+        document.getElementById('alternate_number').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('address').value = '';
+        document.getElementById('product').value = '';
+        document.getElementById('model').value = '';
+    }
+
+    function enforceAttributes(cityField, districtField) {
+        if (cityField.value === '') {
+            cityField.setAttribute('required', 'required');
+            cityField.setAttribute('readonly', 'readonly');
+        } else {
+            cityField.removeAttribute('required');
+            cityField.removeAttribute('readonly');
+        }
+        if (districtField.value === '') {
+            districtField.setAttribute('required', 'required');
+            districtField.setAttribute('readonly', 'readonly');
+        } else {
+            districtField.removeAttribute('required');
+            districtField.removeAttribute('readonly');
+        }
+    }
+
+    // Auto-generate tss_order_no
+    document.addEventListener('DOMContentLoaded', function() {
+        const tssOrderNoField = document.getElementById('tss_order_no');
+        if (tssOrderNoField) {
+            tssOrderNoField.value = 'TSS' + Date.now(); // Example auto-generated value
+        }
+    });
+</script>
+
