@@ -13,16 +13,16 @@ var databasetable = 'outlet'
 // Function to generate dynamic page headers
 function generatePageHeader(name, status) {
     const headerMappings = {
-      'slcCall/open': 'SLC OPEN Call',
-      'slcCall/closed': 'SLC Closed Call',
-      'ccCall/open': 'CC OPEN Call',
-      'ccCall/closed': 'CC Closed Call',
+      'slccall/open': 'SLC OPEN Call',
+      'slccall/closed': 'SLC Closed Call',
+      'cccall/open': 'CC OPEN Call',
+      'cccall/closed': 'CC Closed Call',
       'vendor/all': 'Vendor List',
       'part/all' : 'Parts List',
       'part/new' : 'New Parts',
       'vendor/new' : 'New Vendor',
-      'slcCall/new' : 'New SLC Call',
-      'ccCall/new' : 'New CC Call',
+      'slccall/new' : 'New SLC Call',
+      'cccall/new' : 'New CC Call',
 
 
 
@@ -38,16 +38,16 @@ function generatePageHeader(name, status) {
 
   function generateButtonContent(name, status) {
     const headerMappings = {
-      'slcCall/open': 'New SLC Call',
-      'slcCall/closed': 'New SLC Call',
-      'ccCall/open': 'New CC Call',
-      'ccCall/closed': 'New CC Call',
+      'slccall/open': 'New SLC Call',
+      'slccall/closed': 'New SLC Call',
+      'cccall/open': 'New CC Call',
+      'cccall/closed': 'New CC Call',
       'vendor/all': 'New Vendor',
       'part/all' : 'New Parts',
       'part/new' : 'New Parts',
       'vendor/new' : 'New Vendor',
-      'slcCall/new' : 'New SLC Call',
-      'ccCall/new' : 'New CC Call',
+      'slccall/new' : 'New SLC Call',
+      'cccall/new' : 'New CC Call',
 
 
 
