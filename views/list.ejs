@@ -1,0 +1,97 @@
+<%- include('./header1.ejs') %>
+
+<script>
+// Assuming you're using Handlebars with Node.js
+
+</script>
+<!-- Nav Header Component Start -->
+<div class="iq-navbar-header" style="height: 115px;">
+    <div class="iq-header-img">
+        <img src="/assets/images/dashboard/top-header.png" alt="header" class="theme-color-default-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header1.png" alt="header" class="theme-color-purple-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header2.png" alt="header" class="theme-color-blue-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header3.png" alt="header" class="theme-color-green-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header4.png" alt="header" class="theme-color-yellow-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header5.png" alt="header" class="theme-color-pink-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+    </div>
+</div>
+<!-- Nav Header Component End -->
+<!--Nav End-->
+</div>
+<div class="content-inner container-fluid pb-0" id="page_layout">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <div class="header-title">
+                        <h4 class="card-title"><%= pageHeader %></h4>
+                    </div>
+                    <button type="button" class="btn btn-primary" style="float: right;"><%= buttonContent %></button>
+                </div>
+                <div class="card-body">
+                    <% if (!result[0]) { %>
+                        <p style="font-weight: bold; color: black; text-align: center;">No Data Found</p>
+                    <% } else { %>
+                        <div class="table-responsive">
+                            <table id="input-datatable" class="table" data-toggle="data-table-column-filter">
+                                <thead>
+                                    <tr>
+                                        <% if (result.length > 0) { %>
+                                            <% Object.keys(result[0]).forEach(key => { %>
+                                                <% if (key !== 'status') { %>
+                                                    <th><%= key.charAt(0).toUpperCase() + key.slice(1) %></th>
+                                                <% } %>
+                                            <% }) %>
+                                            <th>Actions</th>
+                                        <% } %>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% result.forEach(item => { %>
+                                        <tr>
+                                            <% Object.entries(item).forEach(([key, value]) => { %>
+                                                <% if (key !== 'status') { %>
+                                                    <td><%= value %></td>
+                                                <% } %>
+                                            <% }) %>
+                                            <td>
+                                                <button class="btn btn-primary" onclick="editItem(<%= item.id %>)">Edit</button>
+                                                <button class="btn btn-danger" onclick="deleteItem(<%= item.id %>)">Delete</button>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <% if (result.length > 0) { %>
+                                            <% Object.keys(result[0]).forEach(key => { %>
+                                                <% if (key !== 'status') { %>
+                                                    <th title="<%= key.charAt(0).toUpperCase() + key.slice(1) %>"><%= key.charAt(0).toUpperCase() + key.slice(1) %></th>
+                                                <% } %>
+                                            <% }) %>
+                                            <th>Actions</th>
+                                        <% } %>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Footer Section Start -->
+<%- include('./footer.ejs') %>
+
+<script>
+    function editItem(id) {
+        // Implement edit functionality here
+        console.log('Edit item with id:', id);
+    }
+
+    function deleteItem(id) {
+        // Implement delete functionality here
+        console.log('Delete item with id:', id);
+    }
+</script>
