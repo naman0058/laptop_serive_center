@@ -23,7 +23,15 @@ function generatePageHeader(name, status) {
       'vendor/new' : 'New Vendor',
       'slccall/new' : 'New SLC Call',
       'cccall/new' : 'New CC Call',
-      'cccall/2': 'Update CC Call'
+      'cccall/2': 'Update CC Call',
+      'system_type/open': 'System Type List',
+      'system_type/new' : 'New System Type',
+      'brand/open' : 'Brand List',
+      'brand/new' : 'New Brand',
+      'engineer/open' : `Engineer's List`,
+      'engineer/new' : 'New Engineer'
+
+
 
 
 
@@ -49,7 +57,19 @@ function generatePageHeader(name, status) {
       'vendor/new' : 'New Vendor',
       'slccall/new' : 'New SLC Call',
       'cccall/new' : 'New CC Call',
-      'cccall/2': 'Update CC Call'
+      'cccall/2': 'Update CC Call',
+      'system_type/open': 'New System Type',
+      'system_type/new' : 'New System Type',
+      'brand/open' : 'New Brand',
+      'brand/new' : 'New Brand',
+      'engineer/open' : 'New Engineer',
+      'engineer/new' : 'New Engineer'
+
+
+
+
+
+
 
 
 
@@ -75,6 +95,8 @@ function generatePageHeader(name, status) {
       'cccall': 'Update CC Call',
       'vendor': 'Update Vendor',
       'part' : 'Update Parts',
+      'system_type' : 'Update System Type',
+      'brand' : 'Update Brand'
       
 
       // Add more mappings as needed
@@ -146,14 +168,37 @@ router.get('/new/:name', verify.adminAuthenticationToken, (req, res) => {
 
 
 
-router.post('/insert',verify.adminAuthenticationToken, upload.single('image'), async (req, res) => {
-    const { body, params, file } = req;
+router.post('/insert',verify.adminAuthenticationToken, upload.fields([ { name: 'image', maxCount: 1 },
+    { name: 'aadhar_card_image', maxCount: 1 } , {name:'pan_card_image' , maxCount : 1} , {name:'selfie' , maxCount:1} , {name:'qr_code' , maxCount:1}]), async (req, res) => {
+    const { body, params, files } = req;
     // const { name } = params;
 
     try {
         body.created_at = verify.getCurrentDate();
         body.updated_at = verify.getCurrentDate();
         body.status = 'open'
+
+        if (files && files['image']) {
+            body.image = req.files['image'][0].filename;
+        }
+
+        if (files && files['aadhar_card_image']) {
+            body.aadhar_card_image = req.files['aadhar_card_image'][0].filename;
+        }
+
+
+        if (files && files['pan_card_image']) {
+            body.pan_card_image = req.files['pan_card_image'][0].filename;
+        }
+
+        if (files && files['selfie']) {
+            body.selfie = req.files['selfie'][0].filename;
+        }
+
+        if (files && files['qr_code']) {
+            body.qr_code = req.files['qr_code'][0].filename;
+        }
+
 
         await queryAsync(`INSERT INTO ${req.body.type} SET ?`, body);
         res.redirect(`/admin/dashboard/new/${encodeURIComponent(req.body.type)}?message=${encodeURIComponent('Saved Successfully')}`);
@@ -175,6 +220,10 @@ router.get('/delete', verify.adminAuthenticationToken, async (req, res) => {
     if (!type || !id) {
         return res.status(400).send('Bad Request');
     }
+
+    // res.json(req.query)
+
+    // console.log('query',req.query)
 
     try {
         const sql = `DELETE FROM ?? WHERE id = ?`;
@@ -231,16 +280,36 @@ router.get('/update/:type/:id', verify.adminAuthenticationToken, async (req, res
 
 
 
-router.post('/update/:type', verify.adminAuthenticationToken, upload.single('image'), async (req, res) => {
-    const { body, params, file } = req;
+router.post('/update/:type', verify.adminAuthenticationToken, upload.fields([ { name: 'image', maxCount: 1 },
+    { name: 'aadhar_card_image', maxCount: 1 } , {name:'pan_card_image' , maxCount : 1} , {name:'selfie' , maxCount:1} , {name:'qr_code' , maxCount:1}]), async (req, res) => {
+    const { body, params, files } = req;
     const { type } = params;
 
     try {
         body.updated_at = verify.getCurrentDate();
         
-        if (file && file.filename) {
-            body.image = file.filename;
+        if (files && files['image']) {
+            body.image = req.files['image'][0].filename;
         }
+
+        if (files && files['aadhar_card_image']) {
+            body.aadhar_card_image = req.files['aadhar_card_image'][0].filename;
+        }
+
+
+        if (files && files['pan_card_image']) {
+            body.pan_card_image = req.files['pan_card_image'][0].filename;
+        }
+
+
+        if (files && files['selfie']) {
+            body.selfie = req.files['selfie'][0].filename;
+        }
+
+        if (files && files['qr_code']) {
+            body.qr_code = req.files['qr_code'][0].filename;
+        }
+
 
         await queryAsync(`UPDATE ${type} SET ? WHERE id = ?`, [body, body.id]);
         res.redirect(`/admin/dashboard/update/${encodeURIComponent(type)}/${encodeURIComponent(body.id)}?message=${encodeURIComponent('Updated Successfully')}`);
@@ -272,6 +341,52 @@ router.get('/contact/form',verify.adminAuthenticationToken,(req,res)=>{
 
 
 
+  
+router.get('/fetch/:column',(req,res)=>{
+    pool.query(`select * from ${req.params.column} order by name`,(err,result)=>{
+      if(err) throw err;
+      else res.json(result)
+    })
+    })
+
+
+
+    router.get('/filter',(req,res)=>{
+        try {
+            const filters = req.query;
+            let query = `SELECT * FROM ${req.query.type} WHERE 1=1`; // Base query
+    
+            // Append conditions to the query based on the filters
+            for (const [key, value] of Object.entries(filters)) {
+                if (value && key !== 'from_date' && key !== 'to_date') {
+                    query += ` AND ${key} = '${value}'`;
+                }
+            }
+
+
+             // Append from_date and to_date conditions
+        if (filters.from_date) {
+            query += ` AND created_at >= '${filters.from_date}'`;
+        }
+        if (filters.to_date) {
+            query += ` AND created_at <= '${filters.to_date}'`;
+        }
+    
+            // Execute the query
+            pool.query(query, (err, results) => {
+                if (err) {
+                    console.error('Error fetching filtered data:', err);
+                    return res.status(500).json({ success: false, error: 'Database error' });
+                }
+    
+                res.json({ success: true, data: results });
+            });
+        } catch (error) {
+            console.error('Error processing request:', error);
+            res.status(500).json({ success: false, error: 'Server error' });
+        }
+    })
+  
   
 
 module.exports = router;

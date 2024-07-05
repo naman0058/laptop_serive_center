@@ -35,25 +35,38 @@
                     </div>
                     <div class="card-body">
                         <div class="new-user-info">
-                            <form action="/admin/dashboard/insert" method="post">
+                            <form action="/admin/dashboard/insert" method="post" enctype="multipart/form-data">
                                 <div class="row">
                                     <input type="hidden" name="type" id="type" value="<%=name%>">
                                     <% columns.forEach(column => { %>
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="<%= column %>"><%= column.charAt(0).toUpperCase() + column.slice(1) %>:</label>
-                                            <input 
-                                                type="text" 
-                                                class="form-control" 
-                                                id="<%= column %>" 
-                                                name="<%= column %>" 
-                                                <%= column === 'pincode' ? "onchange=fetchLocation()" : '' %> 
-                                                <%= column === 'number' ? "onchange=fetchDataByNumber()" : '' %> 
-                                                placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>" 
-                                                <%= (column === 'city' || column === 'district' || column === 'tss_order_no') ? 'readonly required' : '' %>
-                                                <%= column !== 'alternate_number' && column !== 'email' && column !== 'address' && column !== 'product' && column !== 'model' && column !== 'tss_order_no' ? 'required' : '' %>
-                                            >
+                                            <% if (column === 'account') { %>
+                                                <select class="form-control" id="<%= column %>" name="<%= column %>" required>
+                                                    <option value="active">Active</option>
+                                                    <option value="inactive">Inactive</option>
+                                                </select>
+                                            <% } else if (column === 'brand' || column === 'system_type') { %>
+                                                <select class="form-control" id="<%= column %>" name="<%= column %>" required>
+                                                    <option value="">Select <%= column.charAt(0).toUpperCase() + column.slice(1) %></option>
+                                                </select>
+                                            <% } else { %>
+                                                <input 
+                                                    type="<%= (column === 'image' || column === 'aadhar_card_image' || column === 'pan_card_image' || column === 'selfie' || column === 'qr_code') ? 'file' : 'text' %>" 
+                                                    class="form-control" 
+                                                    id="<%= column %>" 
+                                                    name="<%= column %>" 
+                                                    <%= column === 'pincode' ? "onchange=fetchLocation()" : '' %> 
+                                                    <%= column === 'number' ? "onchange=fetchDataByNumber()" : '' %> 
+                                                    placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>" 
+                                                    <%= (column === 'city' || column === 'district' || column === 'tss_order_no') ? 'readonly required' : '' %>
+                                                    <%= column !== 'alternate_number' && column !== 'email' && column !== 'address' && column !== 'product' && column !== 'model' && column !== 'tss_order_no' ? 'required' : '' %>
+                                                >
+                                            <% } %>
                                         </div>
                                     <% }) %>
+                                    
+                                    
                                 </div>
                                 <hr>
                                
@@ -69,6 +82,8 @@
 </div>
 <!-- Footer Section Start -->
 <%- include('./footer.ejs') %>
+
+
 
 
 <script>
@@ -159,3 +174,36 @@
     });
 </script>
 
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchDropdownData('brand');
+        fetchDropdownData('system_type');
+    });
+
+    function fetchDropdownData(column) {
+        const selectElement = document.getElementById(column);
+
+        if (selectElement) {
+            // Example API URL, replace with your actual API endpoint
+            const apiUrl = `/admin/dashboard/fetch/${column}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && Array.isArray(data)) {
+                        data.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item.name; // Adjust based on the API response structure
+                            option.textContent = item.name; // Adjust based on the API response structure
+                            selectElement.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+    }
+</script>

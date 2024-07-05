@@ -36,20 +36,28 @@
                     </div>
                     <div class="card-body">
                         <div class="new-user-info">
-                            <form method="post" action="/admin/dashboard/update/<%=type%>">
+                            <form method="post" action="/admin/dashboard/update/<%=type%>" enctype="multipart/form-data">
                                 <div class="row">
                                     <% columns.forEach(column => { %>
                                         <div class="form-group col-md-6">
                                             <label class="form-label" for="<%= column %>"><%= column.charAt(0).toUpperCase() + column.slice(1) %>:</label>
+                                            <% if (column === 'account') { %>
+                                                <select class="form-control" id="<%= column %>" name="<%= column %>" required>
+                                                    <option value="active" <%= data[column] === 'active' ? 'selected' : '' %>>Active</option>
+                                                    <option value="inactive" <%= data[column] === 'inactive' ? 'selected' : '' %>>Inactive</option>
+                                                </select>
+                                            <% } else { %>
                                             <input 
-                                                type="text" 
+                                            type="<%= (column === 'image' || column === 'aadhar_card_image' || column === 'pan_card_image' || column === 'selfie' || column === 'qr_code') ? 'file' : 'text' %>" 
                                                 class="form-control" 
                                                 id="<%= column %>" 
                                                 name="<%= column %>" 
                                                 value="<%= data[column] %>" 
-                                                <%= column === 'id' ? 'readonly' : 'required' %> 
+                                                <%= column === 'id' ? 'readonly' : '' %> 
+                                                <%= (column !== 'image' && column !== 'aadhar_card_image' && column !== 'pan_card_image' && column !== 'id' && column !== 'selfie' && column !== 'qr_code') ? 'required' : '' %> 
                                                 placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>"
                                             >
+                                            <% } %> 
                                         </div>
                                     <% }) %>
                                     
