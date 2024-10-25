@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 const passport = require('passport');
 const axios = require('axios');
-
+const OAuth = require('oauth-1.0a');
+const crypto = require('crypto');
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -120,8 +121,8 @@ router.get('/auth/instagram/callback', async (req, res) => {
     const { access_token , user_id } = response.data;
     console.log('Short-lived token response:', response.data);
    
-    // const longLivedToken = await longlivedtoken(response.data.access_token)
-    //  console.log('Long Lived Token Output',longLivedToken)
+    const longLivedToken = await longlivedtoken(response.data.access_token)
+     console.log('Long Lived Token Output',longLivedToken)
     
     // Redirect or respond with a success message
      res.redirect(`/instagrampost?access_token=${access_token}&user_id=${user_id}`);
@@ -133,33 +134,33 @@ router.get('/auth/instagram/callback', async (req, res) => {
 });
 
 
-// longlivedtoken('IGQWRONVhQSWNWNkYwcWNwMnlfS2w2N2xpSEFwejUzcWVpUHZAHWnZAIUWhNX3NuQVBvYTNhMXVlRXFLQlNaSmppZAFJmQ1ZA6d3U2WExySTFrZAm5Tb3gxWV9kb3k4OE1RSWNTZAkFlX21OOGcwQ2VuUGpsS2piQ2JDaXJ0aExsbzZAhTmJkdwZDZD')
+//  longlivedtoken('IGQWRPT3ozMVhIN25ZAckhQV1lKR3VlSC1wM2Q0T09paWs3S0t3N3JBUkJndmFsalg3aWE3MVVLbFFsYTdUeHBJcHFEbXc0TmFSbm9IWU1RU2syZAUNnbkQ0dTNfNW42NGhLT3ZA3dmZAwUGF0ZAjRuX0M2bElfXy1ZAc1FCeWZAiOTFxajVEdwZDZD')
 
-// async function longlivedtoken(shortLivedToken) {
-//   if (!shortLivedToken) {
-//     throw new Error('Short-lived token is required');
-//   }
+async function longlivedtoken(shortLivedToken) {
+  if (!shortLivedToken) {
+    throw new Error('Short-lived token is required');
+  }
 
-//   try {
-//     const response = await axios.get('https://graph.instagram.com/access_token', {
-//       params: {
-//         grant_type: 'ig_exchange_token',
-//         client_secret: '93e025dd145211f8b34581b24b6e27a4',  // Replace with your actual Instagram client secret
-//         access_token: shortLivedToken
-//       }
-//     });
+  try {
+    const response = await axios.get('https://graph.instagram.com/access_token', {
+      params: {
+        grant_type: 'ig_exchange_token',
+        client_secret: '93e025dd145211f8b34581b24b6e27a4',  // Replace with your actual Instagram client secret
+        access_token: shortLivedToken
+      }
+    });
 
-//     const { access_token: longLivedToken, expires_in } = response.data;
-//     console.log('Long-lived token response:', response.data);
+    const { access_token: longLivedToken, expires_in } = response.data;
+    console.log('Long-lived token response:', response.data);
 
-//     // Return the long-lived token and expiry information
-//     return { longLivedToken, expires_in };
+    // Return the long-lived token and expiry information
+    return { longLivedToken, expires_in };
 
-//   } catch (error) {
-//     console.error('Error exchanging for long-lived access token:', error.response ? error.response.data : error.message);
-//     throw new Error('Failed to exchange for long-lived access token');
-//   }
-// }
+  } catch (error) {
+    console.error('Error exchanging for long-lived access token:', error.response ? error.response.data : error.message);
+    throw new Error('Failed to exchange for long-lived access token');
+  }
+}
 
 
 router.get('/auth/instagram/refresh_token', async (req, res) => {
@@ -256,21 +257,14 @@ router.get('/instagrampost', async (req, res) => {
       }
     );
 
-    console.log('UploadRes:', uploadRes.data);
+    console.log('UploadRes:', uploadRes);
 
-    const mediaId = uploadRes.data.id;
+    res.json(uploadRes)
+
+   
 
     // Step 2: Publish media using the media container ID
-    const publishRes = await axios.post(
-      `https://graph.facebook.com/v21.0/${userId}/media_publish`,
-      {
-        creation_id: mediaId,
-        access_token: accessToken
-      }
-    );
-
-    console.log('PublishRes:', publishRes.data);
-    res.send("Posted successfully!");
+   
 
   } catch (error) {
     console.error('Error posting to Instagram:', error.response ? error.response.data : error.message);
@@ -283,5 +277,98 @@ router.get('/instagrampost', async (req, res) => {
   }
 });
 
+
+
+
+
+
+// Twitter
+
+
+const base64url = require('base64url');
+  
+  // Helper function to generate a code verifier and code challenge
+  function generateCodeChallenge() {
+      const codeVerifier = base64url(crypto.randomBytes(32));
+      const hash = crypto.createHash('sha256').update(codeVerifier).digest();
+      const codeChallenge = base64url(hash);
+      return { codeVerifier, codeChallenge };
+  }
+  
+  // Store the code verifier and challenge in a temporary in-memory storage (or session)
+  const oauthData = {
+      codeVerifier: null,
+      state: null
+  };
+  
+  router.get('/post-to-twitter', async (req, res) => {
+      // Step 1: Generate the PKCE code challenge
+      const { codeVerifier, codeChallenge } = generateCodeChallenge();
+  
+      // Store the verifier for later use in the token exchange step
+      oauthData.codeVerifier = codeVerifier;
+      oauthData.state = 'randomState123';  // You should generate a random state value in production
+  
+      // Step 2: Construct the authorization URL
+      const clientId = 'WkVjRjBfRmpwQlBaV0dKNktGVGo6MTpjaQ';  // From your Twitter App's "Keys and Tokens" page
+      const redirectUri = 'http://localhost:3000/callback';  // The URL to handle Twitter's redirect
+      const scopes = 'tweet.read tweet.write follows.read users.read';  // Required scopes
+  
+      const authUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${encodeURIComponent(scopes)}&state=${oauthData.state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+  
+      // Redirect the user to the authorization URL
+      res.redirect(authUrl);
+  });
+  
+  // Step 3: Handle the Twitter callback
+  router.get('/callback', async (req, res) => {
+      const { code, state } = req.query;
+  
+      // Verify the state
+      if (state !== oauthData.state) {
+          return res.status(400).send('State mismatch');
+      }
+  
+      // Step 4: Exchange the authorization code for an access token
+      const clientId = 'WkVjRjBfRmpwQlBaV0dKNktGVGo6MTpjaQ';  // From your Twitter App's "Keys and Tokens" page
+      const clientSecret = 'm4_DGhbGIp7UwYJExyMh0PLQfIcJ1uom2x_2B-anYN-lcQxhg9';  // Only for confidential clients
+      const redirectUri = 'http://localhost:3000/callback';  // The same redirect URI
+      const tokenEndpoint = 'https://api.twitter.com/2/oauth2/token';
+      const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
+
+    try {
+    const response = await axios.post(tokenEndpoint, new URLSearchParams({
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: redirectUri,
+        code_verifier: oauthData.codeVerifier
+    }), {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Basic ${basicAuth}`
+        }
+    });
+
+    const accessToken = response.data.access_token;
+    console.log('accessToken', accessToken);
+
+    // Now you can make requests to Twitter's API
+    const tweetResponse = await axios.post('https://api.twitter.com/2/tweets', {
+        text: 'Hello Done This is my first tweet via OAuth 2.0 with PKCE!'
+    }, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        }
+    });
+
+    res.send(`Tweet posted successfully! ID: ${tweetResponse.data.data.id}`);
+} catch (error) {
+    console.error('Error exchanging code for token:', error.response ? error.response.data : error.message);
+    // res.status(500).send('Error exchanging code for token');
+    res.json(error.message)
+}
+  });
+  
 
 module.exports = router;
