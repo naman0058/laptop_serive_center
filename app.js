@@ -13,7 +13,7 @@ var dataservice =require('./routes/dataservice')
 const session = require('express-session');
 const passport = require('passport');
 
-const InstagramStrategy = require('passport-instagram').Strategy; 
+const InstagramStrategy = require('passport-instagram'); 
 
 
 var app = express();
