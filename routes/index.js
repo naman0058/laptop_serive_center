@@ -142,7 +142,7 @@ router.get('/instagrampost', async (req, res) => {
   try {
     // Step 1: Upload media to create a media container
     const uploadRes = await axios.post(
-      `https://graph.facebook.com/v12.0/${req.query.user_id}/media`,
+      `https://graph.facebook.com/v17.0/${req.query.user_id}/media`,
       {
         image_url: imageUrl,
         caption: caption,
@@ -150,14 +150,13 @@ router.get('/instagrampost', async (req, res) => {
       }
     );
 
+    console.log('UploadRes', uploadRes.data);
 
-    console.log('UploadRes',uploadRes)
-    
     const mediaId = uploadRes.data.id;
 
     // Step 2: Publish media using the media container ID
     await axios.post(
-      `https://graph.facebook.com/v12.0/${req.query.user_id}/media_publish`,
+      `https://graph.facebook.com/v17.0/${req.query.user_id}/media_publish`,
       {
         creation_id: mediaId,
         access_token: accessToken
