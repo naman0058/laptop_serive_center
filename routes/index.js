@@ -311,7 +311,7 @@ const base64url = require('base64url');
   
       // Step 2: Construct the authorization URL
       const clientId = 'WkVjRjBfRmpwQlBaV0dKNktGVGo6MTpjaQ';  // From your Twitter App's "Keys and Tokens" page
-      const redirectUri = 'http://localhost:3000/callback';  // The URL to handle Twitter's redirect
+      const redirectUri = 'https://spvaig.com/callback';  // The URL to handle Twitter's redirect
       const scopes = 'tweet.read tweet.write follows.read users.read';  // Required scopes
   
       const authUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${encodeURIComponent(scopes)}&state=${oauthData.state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
@@ -332,7 +332,7 @@ const base64url = require('base64url');
       // Step 4: Exchange the authorization code for an access token
       const clientId = 'WkVjRjBfRmpwQlBaV0dKNktGVGo6MTpjaQ';  // From your Twitter App's "Keys and Tokens" page
       const clientSecret = 'm4_DGhbGIp7UwYJExyMh0PLQfIcJ1uom2x_2B-anYN-lcQxhg9';  // Only for confidential clients
-      const redirectUri = 'http://localhost:3000/callback';  // The same redirect URI
+      const redirectUri = 'https://spvaig.com/callback';  // The same redirect URI
       const tokenEndpoint = 'https://api.twitter.com/2/oauth2/token';
       const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
 
