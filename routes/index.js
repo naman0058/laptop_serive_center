@@ -31,7 +31,7 @@ router.get('/auth/instagram/callback', async (req, res) => {
       client_id: '567466389076193',
       client_secret: '458d7fd0b8df9fd3d138acc462308772',
       grant_type: 'authorization_code',
-      redirect_uri: 'https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=567466389076193&redirect_uri=https://www.spvaig.com/auth/instagram/callback&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish',  // This should match the one used in Step 1
+      redirect_uri: 'https://www.spvaig.com/auth/instagram/callback',  // This should match the one used in Step 1
       code: code
     };
 
@@ -41,6 +41,8 @@ router.get('/auth/instagram/callback', async (req, res) => {
     });
 
     const { access_token, user_id } = response.data;  // Extract access token and user ID
+  console.log('code exchange response',response.data)
+
 
     // Redirect to /instagrampost route, passing the access token as a query parameter
     res.redirect(`/instagrampost?access_token=${access_token}&user_id=${user_id}`);
@@ -95,6 +97,8 @@ router.get('/auth/instagram/callback', async (req, res) => {
 
 
 router.get('/instagrampost', async (req, res) => {
+  console.log('Instagram Post Query Data',req.query)
+
   const imageUrl = 'https://e7.pngegg.com/pngimages/178/595/png-clipart-user-profile-computer-icons-login-user-avatars-monochrome-black.png';
   const caption = 'Hi this is test';
   const accessToken = req.query.access_token;
