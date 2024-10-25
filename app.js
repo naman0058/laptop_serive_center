@@ -45,6 +45,7 @@ function(accessToken, refreshToken, profile, done) {
     refresh_token: refreshToken,
     profile: profile
   };
+  console.log('user details',user)
   done(null, user);
 }));
 
