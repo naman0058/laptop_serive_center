@@ -135,33 +135,30 @@ router.get('/auth/instagram/callback', async (req, res) => {
 
 
 
-async function longlivedtoken(shortLivedToken){
+async function longlivedtoken(shortLivedToken) {
+  if (!shortLivedToken) {
+    throw new Error('Short-lived token is required');
+  }
+
   try {
-    const response = await axios.get(
-      `https://graph.instagram.com/access_token`, {
-        params: {
-          grant_type: 'ig_exchange_token',
-          client_secret: '458d7fd0b8df9fd3d138acc462308772',  // Replace with your actual Instagram client secret
-          access_token: shortLivedToken
-        }
+    const response = await axios.get('https://graph.instagram.com/access_token', {
+      params: {
+        grant_type: 'ig_exchange_token',
+        client_secret: '458d7fd0b8df9fd3d138acc462308772',  // Replace with your actual Instagram client secret
+        access_token: shortLivedToken
       }
-    );
+    });
 
     const { access_token: longLivedToken, expires_in } = response.data;
     console.log('Long-lived token response:', response.data);
 
-    // Optionally store the long-lived token securely, then respond
-    res.send({
-      message: 'Long-lived token obtained successfully',
-      longLivedToken,
-      expires_in
-    });
+    // Return the long-lived token and expiry information
+    return { longLivedToken, expires_in };
 
   } catch (error) {
-    console.error('Error exchanging for long-lived access token:', error.response ? error.response.data : error);
-    res.status(500).send('Failed to exchange for long-lived access token');
+    console.error('Error exchanging for long-lived access token:', error.response ? error.response.data : error.message);
+    throw new Error('Failed to exchange for long-lived access token');
   }
-
 }
 
 
