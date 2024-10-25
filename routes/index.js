@@ -119,19 +119,20 @@ router.get('/auth/instagram/callback', async (req, res) => {
 
     const { access_token , user_id } = response.data;
     console.log('Short-lived token response:', response.data);
+    console.log('Long Lived Token URL',`https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${INSTAGRAM_CLIENT_SECRET}&access_token=${response.data.access_token}`)
 
     // Exchange short-lived token for long-lived token
     const longLivedResponse = await axios.get(
       `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${INSTAGRAM_CLIENT_SECRET}&access_token=${response.data.access_token}`
     );
 
-    const { access_token: longLivedToken, expires_in } = longLivedResponse.data;
-    console.log('Long-lived token response:', longLivedResponse.data);
+    // const { access_token: longLivedToken, expires_in } = longLivedResponse.data;
+    console.log('Long-lived token response:', longLivedResponse);
 
     // Store longLivedToken securely in a database (not shown here)
     
     // Redirect or respond with a success message
-    res.redirect(`/instagrampost?access_token=${longLivedToken}&user_id=${user_id}`);
+    // res.redirect(`/instagrampost?access_token=${longLivedToken}&user_id=${user_id}`);
 
   } catch (error) {
     console.error('Error exchanging code for access token:', error.response ? error.response.data : error);
