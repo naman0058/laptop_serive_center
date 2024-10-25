@@ -148,7 +148,7 @@ router.get('/instagrampost', async (req, res) => {
       {
         image_url: imageUrl,
         caption: caption,
-        access_token: accessToken
+        access_token: req.query.access_token
       }
     );
 
@@ -159,7 +159,7 @@ router.get('/instagrampost', async (req, res) => {
       `https://graph.instagram.com/v12.0/${req.query.user_id}/media_publish`,
       {
         creation_id: mediaId,
-        access_token: accessToken
+        access_token: req.query.access_token
       }
     );
 
