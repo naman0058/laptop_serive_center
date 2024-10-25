@@ -18,6 +18,8 @@ router.get('/', function(req, res, next) {
 router.get('/auth/instagram', passport.authenticate('instagram'));
 
 // Instagram callback route
+const axios = require('axios');
+
 router.get('/auth/instagram/callback', async (req, res) => {
   const code = req.query.code;  // Get the code from the callback request
 
@@ -41,8 +43,7 @@ router.get('/auth/instagram/callback', async (req, res) => {
     });
 
     const { access_token, user_id } = response.data;  // Extract access token and user ID
-  console.log('code exchange response',response.data)
-
+    console.log('code exchange response', response.data);
 
     // Redirect to /instagrampost route, passing the access token as a query parameter
     res.redirect(`/instagrampost?access_token=${access_token}&user_id=${user_id}`);
@@ -52,6 +53,7 @@ router.get('/auth/instagram/callback', async (req, res) => {
     res.status(500).send('Failed to exchange code for access token');
   }
 });
+
 
 
 
