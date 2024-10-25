@@ -133,43 +133,45 @@ module.exports = router;
 
 
 router.get('/instagrampost', async (req, res) => {
-  console.log('Instagram Post Query Data',req.query)
+  console.log('Instagram Post Query Data', req.query);
 
   const imageUrl = 'https://e7.pngegg.com/pngimages/178/595/png-clipart-user-profile-computer-icons-login-user-avatars-monochrome-black.png';
   const caption = 'Hi this is test';
   const accessToken = req.query.access_token;
 
   try {
-    // Retrieve the user's Instagram ID
-   
-    // Step 1: Upload media
+    // Step 1: Upload media to create a media container
     const uploadRes = await axios.post(
-      `https://graph.instagram.com/v12.0/${req.query.user_id}/media`,
+      `https://graph.facebook.com/v12.0/${req.query.user_id}/media`,
       {
         image_url: imageUrl,
         caption: caption,
-        access_token: req.query.access_token
+        access_token: accessToken
       }
     );
 
+
+    console.log('UploadRes',uploadRes)
+    
     const mediaId = uploadRes.data.id;
 
-    // Step 2: Publish media
+    // Step 2: Publish media using the media container ID
     await axios.post(
-      `https://graph.instagram.com/v12.0/${req.query.user_id}/media_publish`,
+      `https://graph.facebook.com/v12.0/${req.query.user_id}/media_publish`,
       {
         creation_id: mediaId,
-        access_token: req.query.access_token
+        access_token: accessToken
       }
     );
 
     res.send("Posted successfully!");
 
   } catch (error) {
-    console.error(error);
+    console.error('Error posting to Instagram:', error.response ? error.response.data : error.message);
     res.status(500).send("Error posting to Instagram");
   }
 });
+
 
 
 module.exports = router;
