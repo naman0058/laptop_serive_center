@@ -10,6 +10,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var admin = require('./routes/admin');
 var dataservice =require('./routes/dataservice')
+const session = require('express-session');
 const passport = require('passport');
 
 const InstagramStrategy = require('passport-instagram').Strategy; 
