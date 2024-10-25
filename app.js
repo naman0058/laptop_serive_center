@@ -33,8 +33,8 @@ app.use(passport.session());
 
 
 passport.use(new InstagramStrategy({
-  clientID: '567466389076193',
-  clientSecret: '458d7fd0b8df9fd3d138acc462308772',
+  clientID: '441162705660684',
+  clientSecret: '93e025dd145211f8b34581b24b6e27a4',
   callbackURL: "/auth/instagram/callback"
 },
 function(accessToken, refreshToken, profile, done) {

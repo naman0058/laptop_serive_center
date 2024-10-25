@@ -29,8 +29,8 @@ router.get('/auth/instagram', passport.authenticate('instagram'));
 //   try {
 //     // Prepare the payload for the token exchange
 //     const payload = {
-//       client_id: '567466389076193',
-//       client_secret: '458d7fd0b8df9fd3d138acc462308772',
+//       client_id: '441162705660684',
+//       client_secret: '93e025dd145211f8b34581b24b6e27a4',
 //       grant_type: 'authorization_code',
 //       redirect_uri: 'https://www.spvaig.com/auth/instagram/callback',  // This should match the one used in Step 1
 //       code: code
@@ -64,8 +64,8 @@ router.get('/auth/instagram', passport.authenticate('instagram'));
 //   try {
 //     // Prepare the payload for the token exchange
 //     const payload = new URLSearchParams();
-//     payload.append('client_id', '567466389076193');
-//     payload.append('client_secret', '458d7fd0b8df9fd3d138acc462308772');
+//     payload.append('client_id', '441162705660684');
+//     payload.append('client_secret', '93e025dd145211f8b34581b24b6e27a4');
 //     payload.append('grant_type', 'authorization_code');
 //     payload.append('redirect_uri', 'https://www.spvaig.com/auth/instagram/callback');  // Match the redirect URI used in Step 1
 //     payload.append('code', code);
@@ -93,8 +93,8 @@ router.get('/auth/instagram', passport.authenticate('instagram'));
 
 
 
-const INSTAGRAM_CLIENT_ID = '567466389076193';
-const INSTAGRAM_CLIENT_SECRET = '458d7fd0b8df9fd3d138acc462308772';
+const INSTAGRAM_CLIENT_ID = '441162705660684';
+const INSTAGRAM_CLIENT_SECRET = '93e025dd145211f8b34581b24b6e27a4';
 const REDIRECT_URI = 'https://www.spvaig.com/auth/instagram/callback';
 
 router.get('/auth/instagram/callback', async (req, res) => {
@@ -120,11 +120,11 @@ router.get('/auth/instagram/callback', async (req, res) => {
     const { access_token , user_id } = response.data;
     console.log('Short-lived token response:', response.data);
    
-    const longLivedToken = await longlivedtoken(response.data.access_token)
-     console.log('Long Lived Token Output',longLivedToken)
+    // const longLivedToken = await longlivedtoken(response.data.access_token)
+    //  console.log('Long Lived Token Output',longLivedToken)
     
     // Redirect or respond with a success message
-    // res.redirect(`/instagrampost?access_token=${longLivedToken}&user_id=${user_id}`);
+     res.redirect(`/instagrampost?access_token=${access_token}&user_id=${user_id}`);
 
   } catch (error) {
     console.error('Error exchanging code for access token:', error.response ? error.response.data : error);
@@ -133,33 +133,33 @@ router.get('/auth/instagram/callback', async (req, res) => {
 });
 
 
+// longlivedtoken('IGQWRONVhQSWNWNkYwcWNwMnlfS2w2N2xpSEFwejUzcWVpUHZAHWnZAIUWhNX3NuQVBvYTNhMXVlRXFLQlNaSmppZAFJmQ1ZA6d3U2WExySTFrZAm5Tb3gxWV9kb3k4OE1RSWNTZAkFlX21OOGcwQ2VuUGpsS2piQ2JDaXJ0aExsbzZAhTmJkdwZDZD')
 
+// async function longlivedtoken(shortLivedToken) {
+//   if (!shortLivedToken) {
+//     throw new Error('Short-lived token is required');
+//   }
 
-async function longlivedtoken(shortLivedToken) {
-  if (!shortLivedToken) {
-    throw new Error('Short-lived token is required');
-  }
+//   try {
+//     const response = await axios.get('https://graph.instagram.com/access_token', {
+//       params: {
+//         grant_type: 'ig_exchange_token',
+//         client_secret: '93e025dd145211f8b34581b24b6e27a4',  // Replace with your actual Instagram client secret
+//         access_token: shortLivedToken
+//       }
+//     });
 
-  try {
-    const response = await axios.get('https://graph.instagram.com/access_token', {
-      params: {
-        grant_type: 'ig_exchange_token',
-        client_secret: '458d7fd0b8df9fd3d138acc462308772',  // Replace with your actual Instagram client secret
-        access_token: shortLivedToken
-      }
-    });
+//     const { access_token: longLivedToken, expires_in } = response.data;
+//     console.log('Long-lived token response:', response.data);
 
-    const { access_token: longLivedToken, expires_in } = response.data;
-    console.log('Long-lived token response:', response.data);
+//     // Return the long-lived token and expiry information
+//     return { longLivedToken, expires_in };
 
-    // Return the long-lived token and expiry information
-    return { longLivedToken, expires_in };
-
-  } catch (error) {
-    console.error('Error exchanging for long-lived access token:', error.response ? error.response.data : error.message);
-    throw new Error('Failed to exchange for long-lived access token');
-  }
-}
+//   } catch (error) {
+//     console.error('Error exchanging for long-lived access token:', error.response ? error.response.data : error.message);
+//     throw new Error('Failed to exchange for long-lived access token');
+//   }
+// }
 
 
 router.get('/auth/instagram/refresh_token', async (req, res) => {
@@ -238,11 +238,17 @@ router.get('/instagrampost', async (req, res) => {
   const imageUrl = 'https://e7.pngegg.com/pngimages/178/595/png-clipart-user-profile-computer-icons-login-user-avatars-monochrome-black.png';
   const caption = 'Hi this is test';
   const accessToken = req.query.access_token;
+  const userId = req.query.user_id;
+
+  // Basic validation of access token and user ID
+  if (!accessToken || !userId) {
+    return res.status(400).send("Access token or user ID is missing");
+  }
 
   try {
     // Step 1: Upload media to create a media container
     const uploadRes = await axios.post(
-      `https://graph.facebook.com/v21.0/${req.query.user_id}/media`,
+      `https://graph.facebook.com/v21.0/${userId}/media`,
       {
         image_url: imageUrl,
         caption: caption,
@@ -250,27 +256,32 @@ router.get('/instagrampost', async (req, res) => {
       }
     );
 
-    console.log('UploadRes', uploadRes.data);
+    console.log('UploadRes:', uploadRes.data);
 
     const mediaId = uploadRes.data.id;
 
     // Step 2: Publish media using the media container ID
-    await axios.post(
-      `https://graph.facebook.com/v21.0/${req.query.user_id}/media_publish`,
+    const publishRes = await axios.post(
+      `https://graph.facebook.com/v21.0/${userId}/media_publish`,
       {
         creation_id: mediaId,
         access_token: accessToken
       }
     );
 
+    console.log('PublishRes:', publishRes.data);
     res.send("Posted successfully!");
 
   } catch (error) {
     console.error('Error posting to Instagram:', error.response ? error.response.data : error.message);
+
+    // Enhanced error handling based on the error code
+    if (error.response && error.response.data.error.code === 190) {
+      return res.status(401).send("Invalid or expired access token. Please re-authenticate.");
+    }
     res.status(500).send("Error posting to Instagram");
   }
 });
-
 
 
 module.exports = router;
