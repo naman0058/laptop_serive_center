@@ -18,12 +18,10 @@ router.get('/', function(req, res, next) {
 router.get('/auth/instagram', passport.authenticate('instagram'));
 
 // Instagram callback route
-router.get('/auth/instagram/callback', passport.authenticate('instagram', {
-  failureRedirect: '/login'
-}), (req, res) => {
+router.get('/auth/instagram/callback', (req, res) => {
   console.log('req.query',req.query.code)
-  console.log('user details',req.user)
-  res.redirect('/dashboard');  // Redirect to dashboard after successful login
+  console.log('user details',req)
+ // Redirect to dashboard after successful login
 });
 
 
