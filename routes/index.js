@@ -77,7 +77,7 @@ router.get('/auth/instagram/callback', async (req, res) => {
       },
     });
 
-    // const { access_token, user_id } = response.data.data;  // Extract access token and user ID
+    const { access_token, user_id } = response.data;  // Extract access token and user ID
     console.log('code exchange response', response.data);
 
     // Redirect to /instagrampost route, passing the access token and user ID as query parameters
