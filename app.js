@@ -10,17 +10,51 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var admin = require('./routes/admin');
 var dataservice =require('./routes/dataservice')
+const InstagramStrategy = require('passport-instagram').Strategy; 
+
 
 var app = express();
 
 
-app.use(cookieSession({
-  name: 'session',
-  keys: ['laptop_service_center'],
+app.use(session({ 
+  secret: 'secretKey', // Change this to a more secure secret in production
+  resave: false, // Only resave if the session is modified
+  saveUninitialized: true // Save uninitialized sessions
+}));
 
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+// Passport initialization
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+
+
+passport.use(new InstagramStrategy({
+  clientID: process.env.INSTAGRAM_CLIENT_ID,
+  clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
+  callbackURL: "/auth/instagram/callback"
+},
+function(accessToken, refreshToken, profile, done) {
+  const user = {
+    id: profile.id,
+    username: profile.displayName,
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    profile: profile
+  };
+  done(null, user);
+}));
+
+
+// Serialize and Deserialize User
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((obj, done) => {
+  done(null, obj);
+});
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

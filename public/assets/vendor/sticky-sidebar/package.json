@@ -29,7 +29,7 @@
   "bugs": {
     "url": "https://github.com/abouolia/sticky-sidebar/issues"
   },
-  "bundleDependencies": false,
+  "bundleDependencies": [],
   "deprecated": false,
   "description": "A JavaScript plugin for making smart and high performance.",
   "devDependencies": {
@@ -81,5 +81,8 @@
   "scripts": {
     "build": "gulp"
   },
-  "version": "3.3.1"
+  "version": "3.3.1",
+  "dependencies": {
+    "sticky-sidebar": "file:"
+  }
 }
