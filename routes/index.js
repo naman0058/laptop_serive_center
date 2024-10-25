@@ -119,17 +119,9 @@ router.get('/auth/instagram/callback', async (req, res) => {
 
     const { access_token , user_id } = response.data;
     console.log('Short-lived token response:', response.data);
-    console.log('Long Lived Token URL',`https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${INSTAGRAM_CLIENT_SECRET}&access_token=${response.data.access_token}`)
-
-    // Exchange short-lived token for long-lived token
-    const longLivedResponse = await axios.get(
-      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${INSTAGRAM_CLIENT_SECRET}&access_token=${response.data.access_token}`
-    );
-
-    // const { access_token: longLivedToken, expires_in } = longLivedResponse.data;
-    console.log('Long-lived token response:', longLivedResponse);
-
-    // Store longLivedToken securely in a database (not shown here)
+   
+    const longLivedToken = await longlivedtoken(response.data.access_token)
+     console.log('Long Lived Token Output',longLivedToken)
     
     // Redirect or respond with a success message
     // res.redirect(`/instagrampost?access_token=${longLivedToken}&user_id=${user_id}`);
@@ -140,6 +132,37 @@ router.get('/auth/instagram/callback', async (req, res) => {
   }
 });
 
+
+
+
+async function longlivedtoken(shortLivedToken){
+  try {
+    const response = await axios.get(
+      `https://graph.instagram.com/access_token`, {
+        params: {
+          grant_type: 'ig_exchange_token',
+          client_secret: '458d7fd0b8df9fd3d138acc462308772',  // Replace with your actual Instagram client secret
+          access_token: shortLivedToken
+        }
+      }
+    );
+
+    const { access_token: longLivedToken, expires_in } = response.data;
+    console.log('Long-lived token response:', response.data);
+
+    // Optionally store the long-lived token securely, then respond
+    res.send({
+      message: 'Long-lived token obtained successfully',
+      longLivedToken,
+      expires_in
+    });
+
+  } catch (error) {
+    console.error('Error exchanging for long-lived access token:', error.response ? error.response.data : error);
+    res.status(500).send('Failed to exchange for long-lived access token');
+  }
+
+}
 
 
 router.get('/auth/instagram/refresh_token', async (req, res) => {
