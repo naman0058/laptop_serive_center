@@ -18,7 +18,6 @@ router.get('/', function(req, res, next) {
 router.get('/auth/instagram', passport.authenticate('instagram'));
 
 // Instagram callback route
-const axios = require('axios');
 
 // router.get('/auth/instagram/callback', async (req, res) => {
 //   const code = req.query.code;  // Get the code from the callback request
