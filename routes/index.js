@@ -18,28 +18,42 @@ router.get('/', function(req, res, next) {
 router.get('/auth/instagram', passport.authenticate('instagram'));
 
 // Instagram callback route
-router.get('/auth/instagram/callback', (req, res) => {
-  console.log('req.query',req.query.code)
-   res.redirect(`/instagrampost?code=${req.query.code}`)
- // Redirect to dashboard after successful login
+router.get('/auth/instagram/callback', async (req, res) => {
+  const code = req.query.code;  // Get the code from the callback request
+
+  if (!code) {
+    return res.status(400).send('Code not found');
+  }
+
+  try {
+    // Prepare the payload for the token exchange
+    const payload = {
+      client_id: '567466389076193',
+      client_secret: '458d7fd0b8df9fd3d138acc462308772',
+      grant_type: 'authorization_code',
+      redirect_uri: 'https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=567466389076193&redirect_uri=https://www.spvaig.com/auth/instagram/callback&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish',  // This should match the one used in Step 1
+      code: code
+    };
+
+    // Send the POST request to exchange the code for the access token
+    const response = await axios.post('https://api.instagram.com/oauth/access_token', null, {
+      params: payload
+    });
+
+    const { access_token, user_id } = response.data;  // Extract access token and user ID
+
+    // Redirect to /instagrampost route, passing the access token as a query parameter
+    res.redirect(`/instagrampost?access_token=${access_token}&user_id=${user_id}`);
+
+  } catch (error) {
+    console.error('Error exchanging code for access token:', error.response ? error.response.data : error);
+    res.status(500).send('Failed to exchange code for access token');
+  }
 });
 
 
 
-async function getUserId(accessToken) {
-  try {
-    const response = await axios.get(`https://graph.instagram.com/me`, {
-      params: {
-        access_token: accessToken,
-        fields: 'id' // Retrieve only the user ID
-      }
-    });
-    return response.data.id;
-  } catch (error) {
-    console.error('Error fetching Instagram User ID:', error);
-    throw error;
-  }
-}
+
 
 
 // router.get('/instagrampost', async (req, res) => {
@@ -83,15 +97,14 @@ async function getUserId(accessToken) {
 router.get('/instagrampost', async (req, res) => {
   const imageUrl = 'https://e7.pngegg.com/pngimages/178/595/png-clipart-user-profile-computer-icons-login-user-avatars-monochrome-black.png';
   const caption = 'Hi this is test';
-  const accessToken = req.query.code;
+  const accessToken = req.query.access_token;
 
   try {
     // Retrieve the user's Instagram ID
-    const userId = await getUserId(accessToken);
-
+   
     // Step 1: Upload media
     const uploadRes = await axios.post(
-      `https://graph.instagram.com/v12.0/${userId}/media`,
+      `https://graph.instagram.com/v12.0/${req.query.user_id}/media`,
       {
         image_url: imageUrl,
         caption: caption,
@@ -103,7 +116,7 @@ router.get('/instagrampost', async (req, res) => {
 
     // Step 2: Publish media
     await axios.post(
-      `https://graph.instagram.com/v12.0/${userId}/media_publish`,
+      `https://graph.instagram.com/v12.0/${req.query.user_id}/media_publish`,
       {
         creation_id: mediaId,
         access_token: accessToken
