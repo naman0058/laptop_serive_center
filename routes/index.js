@@ -117,12 +117,12 @@ router.get('/auth/instagram/callback', async (req, res) => {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
-    const { access_token: shortLivedToken, user_id } = response.data;
+    const { access_token , user_id } = response.data;
     console.log('Short-lived token response:', response.data);
 
     // Exchange short-lived token for long-lived token
     const longLivedResponse = await axios.get(
-      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${INSTAGRAM_CLIENT_SECRET}&access_token=${shortLivedToken}`
+      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${INSTAGRAM_CLIENT_SECRET}&access_token=${response.data.access_token}`
     );
 
     const { access_token: longLivedToken, expires_in } = longLivedResponse.data;
