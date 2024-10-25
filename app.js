@@ -38,14 +38,18 @@ passport.use(new InstagramStrategy({
   callbackURL: "/auth/instagram/callback"
 },
 function(accessToken, refreshToken, profile, done) {
-  const user = {
-    id: profile.id,
-    username: profile.displayName,
-    access_token: accessToken,
-    refresh_token: refreshToken,
-    profile: profile
-  };
-  console.log('user details',user)
+  // const user = {
+  //   id: profile.id,
+  //   username: profile.displayName,
+  //   access_token: accessToken,
+  //   refresh_token: refreshToken,
+  //   profile: profile
+  // };
+  console.log('user details',accessToken)
+  console.log('user details',refreshToken)
+  console.log('user details',profile)
+
+
   done(null, user);
 }));
 

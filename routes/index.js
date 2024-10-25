@@ -28,10 +28,10 @@ router.get('/auth/instagram/callback', passport.authenticate('instagram', {
 
 
 
-router.post('/post', async (req, res) => {
-    const imageUrl = req.body.imageUrl;  // The image URL to post
-    const caption = req.body.caption;    // The caption of the post
-    const accessToken = req.user.access_token;
+router.get('/instagrampost', async (req, res) => {
+    const imageUrl = 'https://e7.pngegg.com/pngimages/178/595/png-clipart-user-profile-computer-icons-login-user-avatars-monochrome-black.png';  // The image URL to post
+    const caption = 'Hi this is test';    // The caption of the post
+    const accessToken = 'AQCLuZb2MKFi4CwYweBdtsyac_mo5oaFF_cV9X9EbiZDk99II0xbGzjSko71bnA77Yr4ycaTq7kqtURAhqP2GkFkrEgHnoXQGzS4k74DXlZUiorVxeXw-bYEamf6fXa01ZEgXdjpjCQWbt3DpwxOzeMb91vejOvB05jrbG4UlHXdLysyYkSVVb_0_mvkAlAvXTgI3j3VMMfY6v99LpuZWnDYVEli8Biry2L8GgiWniXw6g#_'
   
     try {
       // Step 1: Upload media
