@@ -1,0 +1,468 @@
+<%- include('./header1.ejs') %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+
+
+<script>
+// Assuming you're using Handlebars with Node.js
+
+</script>
+<!-- Nav Header Component Start -->
+<div class="iq-navbar-header" style="height: 115px;">
+    <div class="iq-header-img">
+        <img src="/assets/images/dashboard/top-header.png" alt="header" class="theme-color-default-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header1.png" alt="header" class="theme-color-purple-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header2.png" alt="header" class="theme-color-blue-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header3.png" alt="header" class="theme-color-green-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header4.png" alt="header" class="theme-color-yellow-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header5.png" alt="header" class="theme-color-pink-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+    </div>
+</div>
+<!-- Nav Header Component End -->
+<!--Nav End-->
+<div class="content-inner container-fluid pb-0" id="page_layout">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="header-title">
+                        <h4 class="card-title">Apply Filters</h4>
+                        <input type="hidden" id="type" value="<%= name %>">
+                        <input type="hidden" id="status" value="<%= status %>">
+
+                    </div>
+                    
+                </div>
+                <div class="card-body">
+                    <% if (!result[0]) { %>
+                        <p style="font-weight: bold; color: black; text-align: center;">No Data Found</p>
+                    <% } else { %>
+                        <form id="filterForm">
+                            <div class="row">
+                                <div class="form-group col-md-6 col-lg-6">
+                                    <label class="form-label" for="from_date">From Date</label>
+                                    <input type="date" id="from_date" name="from_date" class="form-control">
+                                    
+
+                                    </div>
+
+
+                                    <div class="form-group col-md-6 col-lg-6">
+                                        <label class="form-label" for="to_date">To Date</label>
+                                        <input type="date" id="to_date" name="to_date" class="form-control">
+                                        
+    
+                                        </div>
+
+                                <% Object.keys(result[0]).forEach(key => { %>
+                                    <% if (key !== 'type') { %>
+                                        <% if (key === 'tss_order_no' || key === 'name' || key === 'address' || key === 'brand' || key === 'system_type' || key === 'assign_engineer' || key === 'number' || key === 'alternate_number' || key==='s/n') { %>
+                                        <div class="form-group col-md-3 col-lg-3">
+                                            <label class="form-label" for="<%= key %>"><%= key.charAt(0).toUpperCase() + key.slice(1) %>:</label>
+                                            <% if (key === 'account') { %>
+                                                <select class="form-control" id="<%= key %>" name="<%= key %>" required>
+                                                    <option value="active">Active</option>
+                                                    <option value="inactive">Inactive</option>
+                                                </select>
+                                            <% } else if (key === 'brand' || key === 'system_type' || key === 'assign_engineer') { %>
+                                                <select class="form-control" id="<%= key %>" name="<%= key %>" required>
+                                                    <option value="">Select <%= key.charAt(0).toUpperCase() + key.slice(1) %></option>
+                                                </select>
+                                            <% } else { %>
+                                                <input 
+                                                    type="<%= (key === 'image' || key === 'aadhar_card_image' || key === 'pan_card_image' || key === 'selfie' || key === 'qr_code') ? 'file' : 'text' %>" 
+                                                    class="form-control" 
+                                                    id="<%= key %>" 
+                                                    name="<%= key %>" 
+                                                    <%= key === 'pincode' ? "onchange=fetchLocation()" : '' %> 
+                                                    <%= key === 'number' ? "onchange=fetchDataByNumber()" : '' %> 
+                                                    placeholder="<%= key.charAt(0).toUpperCase() + key.slice(1) %>" 
+                                                    <%= (key === 'city' || key === 'district') ? 'readonly required' : '' %>
+                                                    <%= key !== 'alternate_number' && key !== 'email' && key !== 'address' && key !== 'product' && key !== 'model' && key !== 'tss_order_no' ? 'required' : '' %>
+                                                >
+                                            <% } %>
+                                        </div>
+                                    <% } }   else { %>
+                                        <input type="hidden" id="<%= key %>" name="<%= key %>" value="<%= name %>">
+                                    <% } %>
+                                <% }) %>
+                            </div>
+                            
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <button type="button" class="btn btn-primary" onclick="applyFilters()">Filter</button>
+                                    <button type="button" class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+                                </div>
+                            </div>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-header d-flex justify-content-between">
+                    <div class="header-title">
+                        <h4 class="card-title"><%= pageHeader %></h4>
+                        <input type="hidden" id="type" value="<%= name %>">
+                    </div>
+                   
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <a href="/admin/dashboard/bulk/upload/<%=name%>">
+                            <button type="button" class="btn btn-secondary">Bulk Upload</button>
+                        </a>
+
+                        <a href="/admin/dashboard/bulk/edit/<%=name%>">
+                            <button type="button" class="btn btn-dark">Bulk Edit</button>
+                        </a>
+                    
+                        <a href="/admin/dashboard/new/<%= name %>">
+                            <button type="button" class="btn btn-primary"><%= buttonContent %></button>
+                        </a>
+                    
+
+                        <button type="button" class="btn btn-success" onclick="downloadExcel()">Download Excel</button>
+                    </div>
+                    
+
+                </div>
+                <div class="card-body">
+                    <% if (!result[0]) { %>
+                        <p style="font-weight: bold; color: black; text-align: center;">No Data Found</p>
+                    <% } else { %>
+                        <div class="table-responsive">
+                            <table id="input-datatable" class="table" data-toggle="data-table-key-filter">
+                                <thead>
+                                    <tr>
+                                        <!-- Define column headers in the specific order -->
+                                        <th>ID</th> 
+                                        <th>Name</th>
+                                        <th>Age</th>
+                                        <th>Brand</th>
+                                        <th>Brand Order No</th>
+                                        <th>District</th>
+                                        <th>Assign Engineer</th>
+                                        <th>Address</th>
+                                        <th>Issue</th>
+                                        <th>SN</th>
+                                        <th>Number</th>
+                                        <th>Status</th>
+                                        <th>Type</th>
+                                        <th>Created At</th>
+
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% result.forEach(item => { %>
+                                        <tr>
+                                            <!-- Display data in the specific order -->
+                                            <td><%= item.id %></td>
+                                            <td><%= item.name %></td>
+                                            <td><%= item.age%></td>
+                                            <td><%= item.brand %></td>
+                                            <td><%= item.brand_order_no %></td>
+                                            <td><%= item.district %></td>
+                                            <td><%= item.assign_engineer %></td>
+                                            <td><%= item.address %></td>
+                                            <td><%= item.issue %></td>
+                                            <td><%= item.sn %></td>
+                                            <td><%= item.number %></td>
+                                            <td><%= item.status.replace(/_/g, ' ').charAt(0).toUpperCase() + item.status.replace(/_/g, ' ').slice(1) %></td>
+                                            <td><%= item.type%></td>
+                                            
+                                            <td><%= item.created_at %></td>
+
+                                            <td>
+                                                <a href="/admin/dashboard/update/<%= name %>/<%= item.id %>" class="btn btn-primary">Edit</a>
+                                                <% if(item.status == 'waiting_for_parts') { %>
+                                                    <a href="/admin/dashboard/partsAvailable/<%= name %>/<%= item.id %>" class="btn btn-secondary">Parts Available</a>
+                                                       <% } %>
+                                                <button class="btn btn-danger" onclick="deleteItem('<%= name %>', <%= item.id %>)">Delete</button>
+                                                <a href="/admin/dashboard/print/<%= name %>/<%= item.id %>" class="btn btn-dark">Print</a>
+                                           
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                             
+                            </table>
+                        </div>
+                    <% } %>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Footer Section Start -->
+<%- include('./footer.ejs') %>
+
+<script>
+   function applyFilters() {
+    const form = document.getElementById('filterForm');
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+
+    formData.forEach((value, key) => {
+        if (value) {
+            params.append(key, value);
+        }
+    });
+
+
+    const fromDate = document.getElementById('from_date').value;
+    const toDate = document.getElementById('to_date').value;
+    if (fromDate) params.append('from_date', fromDate);
+    if (toDate) params.append('to_date', toDate);
+
+    const status = document.getElementById('status').value;
+
+
+
+    fetch(`/admin/dashboard/filter/?${params.toString()}&status=${status.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Handle the filtered data and update the table
+                console.log('Filtered data:', data.data);
+                // Re-render the table with the new data
+                updateTable(data.data);
+            } else {
+                console.error('Failed to fetch filtered data');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+function updateTable(data) {
+
+    console.log(data)
+    const tableBody = document.querySelector('#input-datatable tbody');
+    tableBody.innerHTML = ''; // Clear current table rows
+
+    data.forEach(item => {
+        const row = document.createElement('tr');
+
+        // Add cells in the specific column order
+        const columns = [
+            'id','name', 'age', 'brand', 'brand_order_no', 'district', 
+            'assign_engineer', 'address', 
+            'issue', 'sn', 'number', 'status' , 'type',  'created_at'
+        ];
+
+
+        columns.forEach(col => {
+            console.log('item',item[col])
+            const cell = document.createElement('td');
+            cell.textContent = item[col] ?? '';// Display value or empty if not present
+            row.appendChild(cell);
+        });
+
+        // Add the Actions cell
+        const actionsCell = document.createElement('td');
+        actionsCell.innerHTML = `
+            <a href="/admin/dashboard/update/slccall/${item.id}" class="btn btn-primary">Edit</a>`
+               if(item.status == 'waiting_for_parts'){
+             actionsCell.innerHTML+=`<a href="/admin/dashboard/partsAvailable/cccall/${item.id}" class="btn btn-secondary">Parts Available</a>`
+           }
+           actionsCell.innerHTML+=`<button class="btn btn-danger" onclick="deleteItem('slccall', ${item.id})">Delete</button>
+           <a href="/admin/dashboard/print/cccall/${item.id}" class="btn btn-secondary">Print</a>
+
+        `;
+        row.appendChild(actionsCell);
+
+        // Append row to table body
+        tableBody.appendChild(row);
+    });
+}
+
+
+    function resetFilters() {
+        const form = document.getElementById('filterForm');
+        form.reset();
+        applyFilters();
+    }
+
+    function deleteItem(type,id) {
+        if (confirm('Are you sure you want to delete this item?')) {
+            fetch(`/admin/dashboard/delete/?type=${type}&id=${id}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.msg == 'success') {
+                    alert('Item deleted successfully');
+                    location.reload();
+                } else {
+                    alert('Failed to delete item');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    }
+</script>
+
+
+
+<script>
+    function fetchLocation() {
+        const pincode = document.getElementById('pincode').value;
+        const cityField = document.getElementById('city');
+        const districtField = document.getElementById('district');
+
+        if (pincode) {
+            fetch(`https://api.postalpincode.in/pincode/${pincode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data[0].Status === "Success") {
+                        const postOffice = data[0].PostOffice[0];
+                        cityField.value = postOffice.District;
+                        districtField.value = postOffice.State;
+                    } else {
+                        cityField.value = '';
+                        districtField.value = '';
+                    }
+                    // enforceAttributes(cityField, districtField);
+                })
+                .catch(error => {
+                    console.error('Error fetching location:', error);
+                    cityField.value = '';
+                    districtField.value = '';
+                    enforceAttributes(cityField, districtField);
+                });
+        }
+    }
+
+    function fetchDataByNumber() {
+        const number = document.getElementById('number').value;
+        const type =   document.getElementById('type').value;
+
+        if (number) {
+            fetch(`/admin/dashboard/fetchnumber/${number}/${type}`) // Replace with your actual API endpoint
+                .then(response => response.json())
+                .then(data => {
+                    if (data.found) {
+                        document.getElementById('alternate_number').value = data.alternate_number || '';
+                        document.getElementById('email').value = data.email || '';
+                        document.getElementById('address').value = data.address || '';
+                        document.getElementById('product').value = data.product || '';
+                        document.getElementById('model').value = data.model || '';
+                    } else {
+                        clearOptionalFields();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    clearOptionalFields();
+                });
+        }
+    }
+
+    function clearOptionalFields() {
+        document.getElementById('alternate_number').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('address').value = '';
+        document.getElementById('product').value = '';
+        document.getElementById('model').value = '';
+    }
+
+    function enforceAttributes(cityField, districtField) {
+        if (cityField.value === '') {
+            cityField.setAttribute('required', 'required');
+            cityField.setAttribute('readonly', 'readonly');
+        } else {
+            cityField.removeAttribute('required');
+            cityField.removeAttribute('readonly');
+        }
+        if (districtField.value === '') {
+            districtField.setAttribute('required', 'required');
+            districtField.setAttribute('readonly', 'readonly');
+        } else {
+            districtField.removeAttribute('required');
+            districtField.removeAttribute('readonly');
+        }
+    }
+
+ 
+</script>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchDropdownData('brand');
+        fetchDropdownData('engineer');
+        fetchDropdownData('system_type');
+
+    });
+
+    function fetchDropdownData(column) {
+        console.log('fetch dropdown data',column);
+        let selectElement ;
+        if(column == 'engineer'){
+           selectElement = document.getElementById('assign_engineer');
+
+        }
+        else{
+            selectElement = document.getElementById(column);
+
+        }
+
+        if (selectElement) {
+            // Example API URL, replace with your actual API endpoint
+            const apiUrl = `/admin/dashboard/fetch/${column}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+
+                    if (data && Array.isArray(data)) {
+                        data.forEach(item => {
+                            console.log(item)
+                            const option = document.createElement('option');
+                            option.value = item.name; // Adjust based on the API response structure
+                            option.textContent = item.name; // Adjust based on the API response structure
+                            selectElement.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+    }
+</script>
+
+
+
+<script>
+    function downloadExcel() {
+    const status = document.getElementById('status').value;
+        const table = document.getElementById('input-datatable');
+        const ws = XLSX.utils.table_to_sheet(table, { raw: true });
+
+        // Remove the last column (Actions) from the sheet
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let C = range.e.c; C >= range.s.c; --C) {
+            const cell = ws[XLSX.utils.encode_cell({ r: range.s.r, c: C })];
+            if (cell && cell.v === 'Actions') {
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    delete ws[XLSX.utils.encode_cell({ r: R, c: C })];
+                }
+                for (let i = C; i < range.e.c; ++i) {
+                    for (let R = range.s.r; R <= range.e.r; ++R) {
+                        ws[XLSX.utils.encode_cell({ r: R, c: i })] = ws[XLSX.utils.encode_cell({ r: R, c: i + 1 })];
+                    }
+                }
+                range.e.c--;
+                break;
+            }
+        }
+        ws['!ref'] = XLSX.utils.encode_range(range);
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+        XLSX.writeFile(wb, `cc_${status}_call.xlsx`);
+    }
+</script>

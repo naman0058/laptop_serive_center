@@ -1,0 +1,186 @@
+<%- include('./header1.ejs') %>
+
+<!-- Nav Header Component Start -->
+<div class="iq-navbar-header" style="height: 115px;">
+    <div class="container-fluid iq-container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="flex-wrap d-flex justify-content-between align-items-center">
+                    <!-- Optional content here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="iq-header-img">
+        <img src="/assets/images/dashboard/top-header.png" alt="header" class="theme-color-default-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header1.png" alt="header" class="theme-color-purple-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header2.png" alt="header" class="theme-color-blue-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header3.png" alt="header" class="theme-color-green-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header4.png" alt="header" class="theme-color-yellow-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+        <img src="/assets/images/dashboard/top-header5.png" alt="header" class="theme-color-pink-img img-fluid w-100 h-100 animated-scaleX" loading="lazy">
+    </div>
+</div>
+<!-- Nav Header Component End -->
+
+<div class="content-inner container-fluid pb-0" id="page_layout">
+    <div>
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="header-title">
+                            <h4 class="card-title">Bulk Edit <% if(type == 'slccall') { %> SLC Call <% } else { %>  CC Call  <% } %> </h4>
+                            <p style="margin-top: 20px;color: green;font-weight: bold;"><%=msg%></p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="new-user-info">
+                            <form action="/admin/dashboard/bulk-edit/<%=type%>" method="post" enctype="multipart/form-data">
+                                <div class="row">
+
+
+<input type="file" name="excel_file" class="form-control" required>
+
+                                   
+                                    
+                                    
+                                </div>
+                                <hr>
+                               
+                               
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Footer Section Start -->
+<%- include('./footer.ejs') %>
+
+
+
+
+<script>
+    function fetchLocation() {
+        const pincode = document.getElementById('pincode').value;
+        const cityField = document.getElementById('city');
+        const districtField = document.getElementById('district');
+
+        if (pincode) {
+            fetch(`https://api.postalpincode.in/pincode/${pincode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data[0].Status === "Success") {
+                        const postOffice = data[0].PostOffice[0];
+                        cityField.value = postOffice.District;
+                        districtField.value = postOffice.State;
+                    } else {
+                        cityField.value = '';
+                        districtField.value = '';
+                    }
+                    // enforceAttributes(cityField, districtField);
+                })
+                .catch(error => {
+                    console.error('Error fetching location:', error);
+                    cityField.value = '';
+                    districtField.value = '';
+                    enforceAttributes(cityField, districtField);
+                });
+        }
+    }
+
+    function fetchDataByNumber() {
+        const number = document.getElementById('number').value;
+        const type =   document.getElementById('type').value;
+
+        if (number) {
+            fetch(`/admin/dashboard/fetchnumber/${number}/${type}`) // Replace with your actual API endpoint
+                .then(response => response.json())
+                .then(data => {
+                    if (data.found) {
+                        document.getElementById('alternate_number').value = data.alternate_number || '';
+                        document.getElementById('email').value = data.email || '';
+                        document.getElementById('address').value = data.address || '';
+                        document.getElementById('product').value = data.product || '';
+                        document.getElementById('model').value = data.model || '';
+                    } else {
+                        clearOptionalFields();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    clearOptionalFields();
+                });
+        }
+    }
+
+    function clearOptionalFields() {
+        document.getElementById('alternate_number').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('address').value = '';
+        document.getElementById('product').value = '';
+        document.getElementById('model').value = '';
+    }
+
+    function enforceAttributes(cityField, districtField) {
+        if (cityField.value === '') {
+            cityField.setAttribute('required', 'required');
+            cityField.setAttribute('readonly', 'readonly');
+        } else {
+            cityField.removeAttribute('required');
+            cityField.removeAttribute('readonly');
+        }
+        if (districtField.value === '') {
+            districtField.setAttribute('required', 'required');
+            districtField.setAttribute('readonly', 'readonly');
+        } else {
+            districtField.removeAttribute('required');
+            districtField.removeAttribute('readonly');
+        }
+    }
+
+    // Auto-generate tss_order_no
+    document.addEventListener('DOMContentLoaded', function() {
+        const tssOrderNoField = document.getElementById('tss_order_no');
+        if (tssOrderNoField) {
+            tssOrderNoField.value = 'TSS' + Date.now(); // Example auto-generated value
+        }
+    });
+</script>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchDropdownData('brand');
+        fetchDropdownData('system_type');
+    });
+
+    function fetchDropdownData(column) {
+        const selectElement = document.getElementById(column);
+
+        if (selectElement) {
+            // Example API URL, replace with your actual API endpoint
+            const apiUrl = `/admin/dashboard/fetch/${column}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && Array.isArray(data)) {
+                        data.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item.name; // Adjust based on the API response structure
+                            option.textContent = item.name; // Adjust based on the API response structure
+                            selectElement.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+    }
+</script>

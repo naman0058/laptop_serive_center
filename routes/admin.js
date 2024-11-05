@@ -76,6 +76,7 @@ pool.query(`select * from admin where email ='${body.email}' and password = '${b
     console.log('id',result[0].id)
        req.session.adminid = result[0].id
        res.redirect('/admin/dashboard')
+      // res.json(result)
       }
    else res.render(`login`,{msg : 'Enter Wrong Creaditionals'})
 })

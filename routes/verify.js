@@ -42,6 +42,7 @@ const queryAsync = util.promisify(pool.query).bind(pool);
 
 
 function adminAuthenticationToken(req,res,next){
+    console.log('session data',req.session)
   if(req.session.adminid) {
     req.categories = true;
      next();
@@ -55,10 +56,10 @@ function adminAuthenticationToken(req,res,next){
 
 async function userAuthenticationToken(req, res, next) {
     try {
-        const result = await queryAsync('SELECT * FROM users WHERE id = ?', [req.query.id]);
+        const result = await queryAsync('SELECT * FROM engineer WHERE id = ?', [req.query.id]);
 
         if (result.length > 0) {
-            req.data = req.query.id;
+            req.data = result[0].name;
             next();
         } else {
             res.status(401).json({ msg: 'Invalid User ID' });

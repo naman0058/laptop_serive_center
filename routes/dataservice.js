@@ -8,6 +8,9 @@ const upload = require('./multer');
 var folder = 'outlet/filters'
 var isimage = ['outlet']
 var databasetable = 'outlet'
+const moment = require('moment');
+const xlsx = require('xlsx');
+
 
 
 // Function to generate dynamic page headers
@@ -110,26 +113,66 @@ function generatePageHeader(name, status) {
     return headerMappings[key] || `${name}`; // Default header if no mapping found
   }
 
+  router.get('/list/:name/:status', (req, res) => {
+    let renderPage;
 
-router.get('/list/:name/:status',verify.adminAuthenticationToken, (req, res) => {
+    // Determine which page to render based on `name` parameter
+    if (req.params.name === 'slccall') {
+        renderPage = 'slclist';
+    } else if (req.params.name === 'cccall') {
+        renderPage = 'cclist';
+    } else {
+        renderPage = 'list';
+    }
 
+    // Generate header and button content based on name and status
     let pageHeader = generatePageHeader(req.params.name, req.params.status);
     let buttonContent = generateButtonContent(req.params.name, req.params.status);
 
-    pool.query(`SELECT * FROM ${req.params.name} WHERE status = '${req.params.status}' order by id desc`, (err, result) => {
+    // Define query and parameters based on the status parameter
+    let query = `SELECT * FROM ${req.params.name} `;
+    let queryParams = [];
+
+    // If status is 'closed', filter by that specific status; otherwise, exclude 'closed'
+    if (req.params.status === 'closed') {
+        query += `WHERE status = ? `;
+        queryParams.push(req.params.status);
+    } else {
+        query += `WHERE status != 'closed' `;
+    }
+
+    query += `ORDER BY id DESC`;
+
+    // Execute the query with optional parameters
+    pool.query(query, queryParams, (err, result) => {
         if (err) {
-            throw err;
+            console.error("Database error:", err);
+            return res.status(500).send("Internal Server Error");
         } else {
-            // res.json({ result, isImage });
-            res.render(`list`,{result,name:req.params.name,status:req.params.status,pageHeader,buttonContent})
-            // res.json(result)
+            // Calculate the age in days and add it to each record
+            result = result.map(item => {
+                const createdAt = moment(item.created_at);
+                const ageInDays = moment().diff(createdAt, 'days');
+                return { ...item, age: ageInDays };
+            });
+            // Render the appropriate page with the results
+            res.render(renderPage, {
+                result,
+                name: req.params.name,
+                status: req.params.status,
+                pageHeader,
+                buttonContent,
+            });
         }
     });
 });
 
 
 
-router.get('/new/:name', verify.adminAuthenticationToken, (req, res) => {
+
+
+
+router.get('/new/:name',  (req, res) => {
     let pageHeader = generatePageHeader(req.params.name, 'new');
     let buttonContent = generateButtonContent(req.params.name, 'new');
 
@@ -146,14 +189,15 @@ router.get('/new/:name', verify.adminAuthenticationToken, (req, res) => {
                 name: req.params.name,
                 pageHeader,
                 buttonContent,
-                msg:req.query.message
+                msg:req.query.message,
+
             });
         }
     });
 });
 
 
-// router.get('/management/:name', verify.adminAuthenticationToken, (req, res) => {
+// router.get('/management/:name',  (req, res) => {
 //     const paramName = req.params.name;
 //     const response = { name: paramName };
     
@@ -168,7 +212,7 @@ router.get('/new/:name', verify.adminAuthenticationToken, (req, res) => {
 
 
 
-router.post('/insert',verify.adminAuthenticationToken, upload.fields([ { name: 'image', maxCount: 1 },
+router.post('/insert', upload.fields([ { name: 'image', maxCount: 1 },
     { name: 'aadhar_card_image', maxCount: 1 } , {name:'pan_card_image' , maxCount : 1} , {name:'selfie' , maxCount:1} , {name:'qr_code' , maxCount:1}]), async (req, res) => {
     const { body, params, files } = req;
     // const { name } = params;
@@ -214,7 +258,7 @@ router.post('/insert',verify.adminAuthenticationToken, upload.fields([ { name: '
 
 
 
-router.get('/delete', verify.adminAuthenticationToken, async (req, res) => {
+router.get('/delete',  async (req, res) => {
     const { type, id } = req.query;
 
     if (!type || !id) {
@@ -236,7 +280,7 @@ router.get('/delete', verify.adminAuthenticationToken, async (req, res) => {
 });
 
 
-router.get('/update/:type/:id', verify.adminAuthenticationToken, async (req, res) => {
+router.get('/update/:type/:id',  async (req, res) => {
     const {  message } = req.query;
     const { type, id } = req.params;
 
@@ -252,7 +296,7 @@ router.get('/update/:type/:id', verify.adminAuthenticationToken, async (req, res
         const columnQuery = 'SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ?';
         const columns = await queryAsync(columnQuery, [type]);
         const columnNames = columns.map(column => column.COLUMN_NAME)
-                                   .filter(column => !['status', 'created_at', 'updated_at', 'assign_engineer', 'type'].includes(column));
+                                   .filter(column => !['created_at', 'updated_at', 'assign_engineer', 'type'].includes(column));
 
         // Fetch the existing data for the specified id
         const dataQuery = `SELECT * FROM ?? WHERE id = ?`;
@@ -280,10 +324,18 @@ router.get('/update/:type/:id', verify.adminAuthenticationToken, async (req, res
 
 
 
-router.post('/update/:type', verify.adminAuthenticationToken, upload.fields([ { name: 'image', maxCount: 1 },
+router.post('/update/:type',  upload.fields([ { name: 'image', maxCount: 1 },
     { name: 'aadhar_card_image', maxCount: 1 } , {name:'pan_card_image' , maxCount : 1} , {name:'selfie' , maxCount:1} , {name:'qr_code' , maxCount:1}]), async (req, res) => {
     const { body, params, files } = req;
     const { type } = params;
+
+
+    if(req.body.status == 'open'){
+        req.body.status = 'awaiting_onsite_visit'
+    }
+
+
+    console.log('body',req.body)
 
     try {
         body.updated_at = verify.getCurrentDate();
@@ -330,7 +382,7 @@ router.get('/getData/:filter',(req,res)=>{
 
 
 
-router.get('/contact/form',verify.adminAuthenticationToken,(req,res)=>{
+router.get('/contact/form',(req,res)=>{
     pool.query(`select * from contact_us order by id desc`,(err,result)=>{
         if(err) throw err;
         else res.render(`${folder}/contactlist`,{result})
@@ -350,27 +402,76 @@ router.get('/fetch/:column',(req,res)=>{
     })
 
 
+    // router.get('/filter', (req, res) => {
+    //     try {
+    //         const filters = req.query;
+    //         let query = `SELECT * FROM ${req.query.type} WHERE 1=1`; // Base query
+    
+    //         // Append conditions to the query based on the filters
+    //         for (const [key, value] of Object.entries(filters)) {
+    //             if (value && key !== 'from_date' && key !== 'to_date') {
+    //                 query += ` AND ${key} = '${value}'`;
+    //             }
+    //         }
+    
+    //         // Append from_date and to_date conditions
+    //         if (filters.from_date) {
+    //             query += ` AND created_at >= '${filters.from_date}'`;
+    //         }
+    //         if (filters.to_date) {
+    //             query += ` AND created_at <= '${filters.to_date}'`;
+    //         }
+    
+    //         // Execute the query
+    //         pool.query(query, (err, results) => {
+    //             if (err) {
+    //                 console.error('Error fetching filtered data:', err);
+    //                 return res.status(500).json({ success: false, error: 'Database error' });
+    //             }
+    
+    //             // Calculate the age in days for each record
+    //             results = results.map(item => {
+    //                 const createdAt = moment(item.created_at);
+    //                 const ageInDays = moment().diff(createdAt, 'days');
+    //                 return { ...item, age: ageInDays };
+    //             });
+    
+    //             res.json({ success: true, data: results });
+    //         });
+    //     } catch (error) {
+    //         console.error('Error processing request:', error);
+    //         res.status(500).json({ success: false, error: 'Server error' });
+    //     }
+    // });
 
-    router.get('/filter',(req,res)=>{
+
+
+    router.get('/filter', (req, res) => {
         try {
             const filters = req.query;
             let query = `SELECT * FROM ${req.query.type} WHERE 1=1`; // Base query
     
             // Append conditions to the query based on the filters
             for (const [key, value] of Object.entries(filters)) {
-                if (value && key !== 'from_date' && key !== 'to_date') {
+                if (value && key !== 'from_date' && key !== 'to_date' && key !== 'status') {
                     query += ` AND ${key} = '${value}'`;
                 }
             }
-
-
-             // Append from_date and to_date conditions
-        if (filters.from_date) {
-            query += ` AND created_at >= '${filters.from_date}'`;
-        }
-        if (filters.to_date) {
-            query += ` AND created_at <= '${filters.to_date}'`;
-        }
+    
+            // Append status condition
+            if (filters.status && filters.status !== 'closed') {
+                query += ` AND status != 'closed'`;
+            } else if (filters.status === 'closed') {
+                query += ` AND status = 'closed'`;
+            }
+    
+            // Append from_date and to_date conditions
+            if (filters.from_date) {
+                query += ` AND created_at >= '${filters.from_date}'`;
+            }
+            if (filters.to_date) {
+                query += ` AND created_at <= '${filters.to_date}'`;
+            }
     
             // Execute the query
             pool.query(query, (err, results) => {
@@ -379,14 +480,166 @@ router.get('/fetch/:column',(req,res)=>{
                     return res.status(500).json({ success: false, error: 'Database error' });
                 }
     
+                // Calculate the age in days for each record
+                results = results.map(item => {
+                    const createdAt = moment(item.created_at);
+                    const ageInDays = moment().diff(createdAt, 'days');
+                    return { ...item, age: ageInDays };
+                });
+    
                 res.json({ success: true, data: results });
             });
         } catch (error) {
             console.error('Error processing request:', error);
             res.status(500).json({ success: false, error: 'Server error' });
         }
+    });
+    
+    
+
+
+
+    router.get('/bulk/upload/:type',(req,res)=>{
+        res.render('bulkUpload',{type:req.params.type,msg:req.query.message})
     })
+
+
+    router.get('/bulk/edit/:type',(req,res)=>{
+        res.render('bulkEdit',{type:req.params.type,msg:req.query.message})
+    })
+
+
+    router.post('/bulk-upload/:type', upload.single('excel_file'), async (req, res) => {
+        console.log('Processing bulk upload');
+        
+        const type = req.params.type;
+        const excelFilePath = `public/images/${req.file.filename}`;
+        
+        try {
+            const workbook = xlsx.readFile(excelFilePath);
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const rawData = xlsx.utils.sheet_to_json(worksheet);
+    
+            // Preprocess data: remove 'age' field, convert keys to lowercase, and replace spaces with underscores
+            const data = rawData.map(item => {
+                return Object.keys(item).reduce((acc, key) => {
+                    if (key.toLowerCase() !== 'age') {
+                        const newKey = key.toLowerCase().replace(/\s+/g, '_');
+                        acc[newKey] = item[key];
+                    }
+                    return acc;
+                }, {});
+            });
+    
+            // Process each row of the Excel data asynchronously
+            const insertPromises = data.map(async (item) => {
+                return new Promise((resolve, reject) => {
+                    // Check if entry already exists based on `brand_order_no`
+                    pool.query(`SELECT * FROM ${type} WHERE brand_order_no = ?`, [item.brand_order_no], (err, result) => {
+                        if (err) return reject(err);
+    
+                        if (result.length > 0) {
+                            console.log(`Order No ${item.brand_order_no} already exists, skipping insertion`);
+                            resolve(null); // No action taken
+                        } else {
+                            // Insert the new record
+                            pool.query(`INSERT INTO ${type} SET ?`, item, (err, result) => {
+                                if (err) return reject(err);
+                                resolve(result); // Insertion done
+                            });
+                        }
+                    });
+                });
+            });
+    
+            // Wait for all insertions to complete
+            await Promise.all(insertPromises);
+    
+            // res.json({ msg: 'Bulk upload completed successfully' });
+            res.redirect(`/admin/dashboard/bulk/upload/${type}?message=Upload Successfull`)
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+
+
+
+    router.post('/bulk-edit/:type', upload.single('excel_file'), async (req, res) => {
+        console.log('Processing bulk edit');
+        
+        const type = req.params.type;
+        const excelFilePath = `public/images/${req.file.filename}`;
+        
+        try {
+            const workbook = xlsx.readFile(excelFilePath);
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const rawData = xlsx.utils.sheet_to_json(worksheet);
+    
+            // Preprocess data: remove 'age' field, convert keys to lowercase, and replace spaces with underscores
+            const data = rawData.map(item => {
+                return Object.keys(item).reduce((acc, key) => {
+                    if (key.toLowerCase() !== 'age') {
+                        const newKey = key.toLowerCase().replace(/\s+/g, '_');
+                        acc[newKey] = item[key];
+                    }
+                    return acc;
+                }, {});
+            });
+    
+            // Process each row of the Excel data asynchronously
+            const insertPromises = data.map(async (item) => {
+                return new Promise((resolve, reject) => {
+                    // Check if entry already exists based on `brand_order_no`
+                    
+                            // Insert the new record
+                            pool.query(`update ${type} SET ? WHERE id = ?`, [item,item.id], (err, result) => {
+                                if (err) return reject(err);
+                                resolve(result); // Insertion done
+                            });
+                        
+                });
+            });
+    
+            // Wait for all insertions to complete
+            await Promise.all(insertPromises);
+    
+            // res.json({ msg: 'Bulk upload completed successfully' });
+            res.redirect(`/admin/dashboard/bulk/edit/${type}?message=Edit Successfull`)
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: error.message });
+        }
+    });
+    
+
+
+    
   
-  
+    router.get('/print/:type/:id', (req, res) => {
+        pool.query(`SELECT * FROM ${req.params.type} WHERE id = ?`, [req.params.id], (err, result) => {
+            if (err) {
+                console.error(err);
+                res.status(500).send("An error occurred while processing your request.");
+            } else {
+                // res.render('print', { type: req.params.type, result });
+                res.json(result)
+            }
+        });
+    });
+    
+
+
+router.get('/partsAvailable/:type/:id',(req,res)=>{
+    pool.query(`update ${req.params.type} set status = 'parts_available' where id = '${req.params.id}'`,(err,result)=>{
+        if(err) throw err;
+        else {
+            res.redirect(`/admin/dashboard/list/${req.params.type}/open`)
+        }
+    })
+})
 
 module.exports = router;

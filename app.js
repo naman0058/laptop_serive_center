@@ -10,6 +10,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var admin = require('./routes/admin');
 var dataservice =require('./routes/dataservice')
+var api = require('./routes/api');
 const session = require('express-session');
 const passport = require('passport');
 
@@ -19,49 +20,49 @@ const InstagramStrategy = require('passport-instagram');
 var app = express();
 
 
-app.use(session({ 
-  secret: 'secretKey', // Change this to a more secure secret in production
-  resave: false, // Only resave if the session is modified
-  saveUninitialized: true // Save uninitialized sessions
-}));
+// app.use(session({ 
+//   secret: 'secretKey', // Change this to a more secure secret in production
+//   resave: false, // Only resave if the session is modified
+//   saveUninitialized: true // Save uninitialized sessions
+// }));
 
 // Passport initialization
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 
 
 
-passport.use(new InstagramStrategy({
-  clientID: '441162705660684',
-  clientSecret: '93e025dd145211f8b34581b24b6e27a4',
-  callbackURL: "/auth/instagram/callback"
-},
-function(accessToken, refreshToken, profile, done) {
-  // const user = {
-  //   id: profile.id,
-  //   username: profile.displayName,
-  //   access_token: accessToken,
-  //   refresh_token: refreshToken,
-  //   profile: profile
-  // };
-  console.log('user details',accessToken)
-  console.log('user details',refreshToken)
-  console.log('user details',profile)
+// passport.use(new InstagramStrategy({
+//   clientID: '441162705660684',
+//   clientSecret: '93e025dd145211f8b34581b24b6e27a4',
+//   callbackURL: "/auth/instagram/callback"
+// },
+// function(accessToken, refreshToken, profile, done) {
+//   // const user = {
+//   //   id: profile.id,
+//   //   username: profile.displayName,
+//   //   access_token: accessToken,
+//   //   refresh_token: refreshToken,
+//   //   profile: profile
+//   // };
+//   console.log('user details',accessToken)
+//   console.log('user details',refreshToken)
+//   console.log('user details',profile)
 
 
-  done(null, user);
-}));
+//   done(null, user);
+// }));
 
 
-// Serialize and Deserialize User
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
+// // Serialize and Deserialize User
+// passport.serializeUser((user, done) => {
+//   done(null, user);
+// });
 
-passport.deserializeUser((obj, done) => {
-  done(null, obj);
-});
+// passport.deserializeUser((obj, done) => {
+//   done(null, obj);
+// });
 
 
 // view engine setup
@@ -78,6 +79,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/admin',admin);
 app.use('/admin/dashboard',dataservice);
+app.use('/api/v1',api);
 
 
 // catch 404 and forward to error handler

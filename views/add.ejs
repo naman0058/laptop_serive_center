@@ -50,7 +50,12 @@
                                                 <select class="form-control" id="<%= column %>" name="<%= column %>" required>
                                                     <option value="">Select <%= column.charAt(0).toUpperCase() + column.slice(1) %></option>
                                                 </select>
-                                            <% } else { %>
+                                            <% } else if(column === 'call_type') { %>
+                                                <select class="form-control" id="<%= column %>" name="<%= column %>" required>
+                                                    <option value="warranty_calls">Warranty Calls</option>
+                                                    <option value="amc_calls">AMC Calls</option>
+                                                </select>
+                                               <% } else { %>
                                                 <input 
                                                     type="<%= (column === 'image' || column === 'aadhar_card_image' || column === 'pan_card_image' || column === 'selfie' || column === 'qr_code') ? 'file' : 'text' %>" 
                                                     class="form-control" 
