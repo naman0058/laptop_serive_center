@@ -20,6 +20,18 @@ const InstagramStrategy = require('passport-instagram');
 var app = express();
 
 
+app.use(cookieSession({
+  name: 'session',
+  keys: ['laptop_application_service_center'],
+  resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true },
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
+
+
 // app.use(session({ 
 //   secret: 'secretKey', // Change this to a more secure secret in production
 //   resave: false, // Only resave if the session is modified
