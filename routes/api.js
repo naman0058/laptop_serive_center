@@ -42,17 +42,11 @@ router.post('/user/login', async (req, res) => {
 
 router.get('/user/dashboard', verify.userAuthenticationToken, async (req, res) => {
     try {
-       
-        const warranty_calls = `select count(id) as warranty_calls  from slccall where call_type = 'warranty_calls' and status!= 'closed' and assign_engineer = '${req.data}';`
+        const engineer_details = `select balance from engineer where name = '${req.data}';`
+        const warranty_calls = `select count(id) as warranty_calls  from slccall where call_type = 'warranty_calls' and status= 'awaiting_onsite_visit' and assign_engineer = '${req.data}';`
         const amc_calls = `select count(id) as amc_calls from slccall where call_type = 'amc_calls' and status!= 'closed' and assign_engineer = '${req.data}';`
-        const cc_calls = `select count(id) as cc_calls from cccall where status!= 'closed' and assign_engineer = '${req.data}';`
-        const engineer_onsite_calls = `
-    SELECT COUNT(id) AS engineer_onsite_calls 
-    FROM (
-        SELECT id FROM cccall WHERE status != 'closed' AND assign_engineer = '${req.data}'
-        UNION ALL
-        SELECT id FROM slccall WHERE status != 'closed' AND assign_engineer = '${req.data}'
-    ) AS combined_calls;
+        const cc_calls = `select count(id) as cc_calls from cccall where status = 'awaiting_onsite_visit' and assign_engineer = '${req.data}';`
+        const engineer_onsite_calls = `select count(id) as engineer_onsite_calls  from slccall where status= 'onsite_calls' and assign_engineer = '${req.data}';
 `;
 
 const parts_call = `
@@ -72,9 +66,9 @@ FROM (
 const pending_ta = `
 SELECT COUNT(id) AS pending_ta 
 FROM (
-    SELECT id FROM cccall WHERE status = 'pending_for_approval' AND assign_engineer = '${req.data}'
+    SELECT id FROM cccall WHERE (status = 'pending_for_approval' or status = 'pending_cashout') AND assign_engineer = '${req.data}'
     UNION ALL
-    SELECT id FROM slccall WHERE status = 'pending_for_approval' AND assign_engineer = '${req.data}'
+    SELECT id FROM slccall WHERE (status = 'pending_for_approval' or status = 'pending_cashout') AND assign_engineer = '${req.data}'
 ) AS combined_calls;
 `;
 
@@ -92,7 +86,7 @@ FROM (
 
 
       
-        const sqlQuery = warranty_calls + amc_calls + cc_calls + engineer_onsite_calls + parts_call + pending_ta + disapprove_calls;
+        const sqlQuery = warranty_calls + amc_calls + cc_calls + engineer_onsite_calls + parts_call + pending_ta + disapprove_calls +engineer_details;
         const result = await queryAsync(sqlQuery);
 
 
@@ -119,7 +113,7 @@ router.get('/user/dashboard/calls/:callType', verify.userAuthenticationToken, as
                 query = `
                     SELECT *, DATEDIFF(NOW(), created_at) AS ageInDays FROM slccall 
                     WHERE call_type = 'warranty_calls' 
-                    AND status != 'closed' 
+                    AND status = 'awaiting_onsite_visit'
                     AND assign_engineer = '${engineerId}';
                 `;
                 break;
@@ -134,17 +128,15 @@ router.get('/user/dashboard/calls/:callType', verify.userAuthenticationToken, as
             case 'cc_calls':
                 query = `
                     SELECT *, DATEDIFF(NOW(), created_at) AS ageInDays FROM cccall 
-                    WHERE status != 'closed' 
+                    WHERE status = 'awaiting_onsite_visit' 
                     AND assign_engineer = '${engineerId}';
                 `;
                 break;
             case 'engineer_onsite_calls':
                 query = `
-                    SELECT name, brand_order_no, address, district, number,type,id, status, assign_engineer, DATEDIFF(NOW(), created_at) AS ageInDays FROM cccall 
-                    WHERE status != 'closed' AND assign_engineer = '${engineerId}'
-                    UNION ALL
-                    SELECT name, brand_order_no, address, district, number,type,id, status, assign_engineer, DATEDIFF(NOW(), created_at) AS ageInDays FROM slccall 
-                    WHERE status != 'closed' AND assign_engineer = '${engineerId}';
+                SELECT *, DATEDIFF(NOW(), created_at) AS ageInDays FROM slccall 
+                    WHERE status = 'onsite_calls' 
+                    AND assign_engineer = '${engineerId}';
                 `;
                 break;
             case 'parts_call':
@@ -159,10 +151,10 @@ router.get('/user/dashboard/calls/:callType', verify.userAuthenticationToken, as
             case 'pending_ta':
                 query = `
                     SELECT name, brand_order_no, address, district, number,type,id, status, assign_engineer, DATEDIFF(NOW(), created_at) AS ageInDays FROM cccall 
-                    WHERE status = 'pending_for_approval' AND assign_engineer = '${engineerId}'
+                    WHERE (status = 'pending_for_approval' or status = 'pending_cashout') AND assign_engineer = '${engineerId}'
                     UNION ALL
                     SELECT name, brand_order_no, address, district, number,type,id, status, assign_engineer, DATEDIFF(NOW(), created_at) AS ageInDays FROM slccall 
-                    WHERE status = 'pending_for_approval' AND assign_engineer = '${engineerId}';
+                    WHERE (status = 'pending_for_approval' or status = 'pending_cashout') AND assign_engineer = '${engineerId}';
                 `;
                 break;
             case 'disapprove_calls':
@@ -238,6 +230,8 @@ router.post(
                 goodPartsPhoto: goodPartsPhotoFiles,
                 defectivePartsName: body.defectivePartsName,
                 goodPartsName: body.goodPartsName,
+                partsMemoReport: body.partsMemoReport,
+                diagnosticReport: body.diagnosticReport
                 // Add other fields as necessary
             };
 
@@ -264,6 +258,23 @@ router.post(
 
 
 
+
+router.post('/update-status', (req, res) => {
+    const { status, id } = req.body; // Destructure status and id from req.body
+
+    if (!status || !id) {
+        return res.status(400).json({ error: "Status and ID are required" });
+    }
+
+    pool.query(`UPDATE slccall SET status = ? WHERE id = ?`, [status, id], (err, result) => {
+        if (err) {
+            console.error("Error updating status:", err);
+            return res.status(500).json({ error: "Database error" });
+        } else {
+            res.json({ message: "Status updated successfully" });
+        }
+    });
+});
 
 
 
@@ -775,6 +786,22 @@ router.get('/user/trade/details', verify.userAuthenticationToken, async (req, re
     
     
     
+
+    router.post('/insertCashout',(req,res)=>{
+        let body = req.body;
+        pool.query(`insert into cashout set ?`,body,(err,result)=>{
+            if(err) throw err;
+            else res.json({msg:'success'})
+        })
+    })
+
+
+    router.get('/getCashout',(req,res)=>{
+        pool.query(`select * from cashout where callid = '${req.query.callid}'`,(err,result)=>{
+            if(err) throw err;
+            else res.json(result)
+        })
+    })
     
 
 module.exports = router

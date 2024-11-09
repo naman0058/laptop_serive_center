@@ -22,106 +22,15 @@
 <div class="content-inner container-fluid pb-0" id="page_layout">
     <div class="row">
         <div class="col-sm-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div class="header-title">
-                        <h4 class="card-title">Apply Filters</h4>
-                        <input type="hidden" id="type" value="<%= name %>">
-                        <input type="hidden" id="status" value="<%= status %>">
-
-                    </div>
-                    
-                </div>
-                <div class="card-body">
-                    <% if (!result[0]) { %>
-                        <p style="font-weight: bold; color: black; text-align: center;">No Data Found</p>
-                    <% } else { %>
-                        <form id="filterForm">
-                            <div class="row">
-                                <div class="form-group col-md-6 col-lg-6">
-                                    <label class="form-label" for="from_date">From Date</label>
-                                    <input type="date" id="from_date" name="from_date" class="form-control">
-                                    
-
-                                    </div>
-
-
-                                    <div class="form-group col-md-6 col-lg-6">
-                                        <label class="form-label" for="to_date">To Date</label>
-                                        <input type="date" id="to_date" name="to_date" class="form-control">
-                                        
-    
-                                        </div>
-
-                                <% Object.keys(result[0]).forEach(key => { %>
-                                    <% if (key !== 'type') { %>
-                                        <% if (key === 'tss_order_no' || key === 'name' || key === 'address' || key === 'brand' || key === 'system_type' || key === 'assign_engineer' || key === 'number' || key === 'alternate_number' || key==='s/n') { %>
-                                        <div class="form-group col-md-3 col-lg-3">
-                                            <label class="form-label" for="<%= key %>"><%= key.charAt(0).toUpperCase() + key.slice(1) %>:</label>
-                                            <% if (key === 'account') { %>
-                                                <select class="form-control" id="<%= key %>" name="<%= key %>" required>
-                                                    <option value="active">Active</option>
-                                                    <option value="inactive">Inactive</option>
-                                                </select>
-                                            <% } else if (key === 'brand' || key === 'system_type' || key === 'assign_engineer') { %>
-                                                <select class="form-control" id="<%= key %>" name="<%= key %>" required>
-                                                    <option value="">Select <%= key.charAt(0).toUpperCase() + key.slice(1) %></option>
-                                                </select>
-                                            <% } else { %>
-                                                <input 
-                                                    type="<%= (key === 'image' || key === 'aadhar_card_image' || key === 'pan_card_image' || key === 'selfie' || key === 'qr_code') ? 'file' : 'text' %>" 
-                                                    class="form-control" 
-                                                    id="<%= key %>" 
-                                                    name="<%= key %>" 
-                                                    <%= key === 'pincode' ? "onchange=fetchLocation()" : '' %> 
-                                                    <%= key === 'number' ? "onchange=fetchDataByNumber()" : '' %> 
-                                                    placeholder="<%= key.charAt(0).toUpperCase() + key.slice(1) %>" 
-                                                    <%= (key === 'city' || key === 'district') ? 'readonly required' : '' %>
-                                                    <%= key !== 'alternate_number' && key !== 'email' && key !== 'address' && key !== 'product' && key !== 'model' && key !== 'tss_order_no' ? 'required' : '' %>
-                                                >
-                                            <% } %>
-                                        </div>
-                                    <% } }   else { %>
-                                        <input type="hidden" id="<%= key %>" name="<%= key %>" value="<%= name %>">
-                                    <% } %>
-                                <% }) %>
-                            </div>
-                            
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <button type="button" class="btn btn-primary" onclick="applyFilters()">Filter</button>
-                                    <button type="button" class="btn btn-secondary" onclick="resetFilters()">Reset</button>
-                                </div>
-                            </div>
-                        </form>
-                    <% } %>
-                </div>
-            </div>
+           
 
             <div class="card" style="margin-top: 20px;">
                 <div class="card-header d-flex justify-content-between">
                     <div class="header-title">
-                        <h4 class="card-title"><%= pageHeader %></h4>
-                        <input type="hidden" id="type" value="<%= name %>">
+                        <h4 class="card-title">Pending For TA Calls</h4>
                     </div>
                    
-                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                        <a href="/admin/dashboard/bulk/upload/<%=name%>">
-                            <button type="button" class="btn btn-secondary">Bulk Upload</button>
-                        </a>
-
-                        <a href="/admin/dashboard/bulk/edit/<%=name%>">
-                            <button type="button" class="btn btn-dark">Bulk Edit</button>
-                        </a>
-                    
-                        <a href="/admin/dashboard/new/<%= name %>">
-                            <button type="button" class="btn btn-primary"><%= buttonContent %></button>
-                        </a>
-                    
-
-                        <button type="button" class="btn btn-success" onclick="downloadExcel()">Download Excel</button>
-                    </div>
+                  
                     
 
                 </div>
@@ -145,10 +54,8 @@
                                         <th>Issue</th>
                                         <th>SN</th>
                                         <th>Number</th>
-                                        <th>Status</th>
                                         <th>Type</th>
                                         <th>Created At</th>
-
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -158,7 +65,7 @@
                                             <!-- Display data in the specific order -->
                                             <td><%= item.id %></td>
                                             <td><%= item.name %></td>
-                                            <td><%= item.age%></td>
+                                            <td><%= item.ageInDays%></td>
                                             <td><%= item.brand %></td>
                                             <td><%= item.brand_order_no %></td>
                                             <td><%= item.district %></td>
@@ -167,19 +74,29 @@
                                             <td><%= item.issue %></td>
                                             <td><%= item.sn %></td>
                                             <td><%= item.number %></td>
-                                            <td><%= item.status.replace(/_/g, ' ').charAt(0).toUpperCase() + item.status.replace(/_/g, ' ').slice(1) %></td>
                                             <td><%= item.type%></td>
-                                            
+
                                             <td><%= item.created_at %></td>
 
                                             <td>
-                                                <a href="/admin/dashboard/update/<%= name %>/<%= item.id %>" class="btn btn-primary">Edit</a>
-                                                <% if(item.status == 'waiting_for_parts') { %>
-                                                    <a href="/admin/dashboard/partsAvailable/<%= name %>/<%= item.id %>" class="btn btn-secondary">Parts Available</a>
-                                                       <% } %>
-                                                <button class="btn btn-danger" onclick="deleteItem('<%= name %>', <%= item.id %>)">Delete</button>
-                                                <a href="/admin/dashboard/print/<%= name %>/<%= item.id %>" class="btn btn-dark">Print</a>
-                                           
+
+                                                <%if(item.type == 'cccall'){ %>
+                         
+
+                                                <a href="/admin/dashboard/viewDetails/<%=item.type%>/<%= item.id %>" target="_blank" class="btn btn-dark">View Details</a>
+                                               
+                                                <a href="/admin/dashboard/update/<%=item.type%>/<%= item.id %>/closed" class="btn btn-primary">Approve</a>
+
+
+                                                <% } else { %>
+
+                                                    <a href="/admin/dashboard/update/<%=item.type%>/<%= item.id %>/pending_cashout" class="btn btn-primary">Approve</a>
+
+                                                    <% } %>
+                                               
+                                                <a href="/admin/dashboard/update/<%=item.type%>/<%= item.id %>/disapprove_calls" class="btn btn-danger">Disapprove</a>
+                                                
+                                                
                                             </td>
                                         </tr>
                                     <% }) %>
@@ -246,8 +163,8 @@ function updateTable(data) {
         // Add cells in the specific column order
         const columns = [
             'id','name', 'age', 'brand', 'brand_order_no', 'district', 
-            'assign_engineer', 'address', 
-            'issue', 'sn', 'number', 'status' , 'type',  'created_at'
+            'assign_engineer', 'address', 'tss_order_no', 
+            'issue', 'sn', 'number', 'alternate_number' , 'status', 'call_type', 'type' , 'created_at'
         ];
 
 
@@ -262,12 +179,11 @@ function updateTable(data) {
         const actionsCell = document.createElement('td');
         actionsCell.innerHTML = `
             <a href="/admin/dashboard/update/slccall/${item.id}" class="btn btn-primary">Edit</a>`
-               if(item.status == 'waiting_for_parts'){
-             actionsCell.innerHTML+=`<a href="/admin/dashboard/partsAvailable/cccall/${item.id}" class="btn btn-secondary">Parts Available</a>`
+           if(item.status == 'waiting_for_parts'){
+            actionsCell.innerHTML+=`<a href="/admin/dashboard/partsAvailable/slccall/${item.id}" class="btn btn-secondary">Parts Available</a>`
            }
            actionsCell.innerHTML+=`<button class="btn btn-danger" onclick="deleteItem('slccall', ${item.id})">Delete</button>
-           <a href="/admin/dashboard/print/cccall/${item.id}" class="btn btn-secondary">Print</a>
-
+           <a href="/admin/dashboard/print/slccall/${item.id}" class="btn btn-secondary">Print</a>
         `;
         row.appendChild(actionsCell);
 
@@ -283,34 +199,24 @@ function updateTable(data) {
         applyFilters();
     }
 
-    function deleteItem(type, id) {
-    // Ask the user for the password
-    const userPassword = prompt('Please enter your password to confirm deletion:');
-    
-    // Check if the password matches the predefined password
-    if (userPassword === 'TSSAdmin@#123') {
-        // If the password is correct, proceed with deletion
-        fetch(`/admin/dashboard/delete/?type=${type}&id=${id}`, {
-            method: 'GET'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.msg == 'success') {
-                alert('Item deleted successfully');
-                location.reload();  // Reload the page to reflect changes
-            } else {
-                alert('Failed to delete item');
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    } else {
-        // If the password doesn't match, show an alert
-        alert('Invalid password');
+    function deleteItem(type,id) {
+        if (confirm('Are you sure you want to delete this item?')) {
+            fetch(`/admin/dashboard/delete/?type=${type}&id=${id}`, {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.msg == 'success') {
+                    alert('Item deleted successfully');
+                    location.reload();
+                } else {
+                    alert('Failed to delete item');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
     }
-}
-
- 
- </script>
+</script>
 
 
 
@@ -448,6 +354,7 @@ function updateTable(data) {
 <script>
     function downloadExcel() {
     const status = document.getElementById('status').value;
+
         const table = document.getElementById('input-datatable');
         const ws = XLSX.utils.table_to_sheet(table, { raw: true });
 
@@ -473,6 +380,6 @@ function updateTable(data) {
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
 
-        XLSX.writeFile(wb, `cc_${status}_call.xlsx`);
+        XLSX.writeFile(wb, `occ_${status}_call.xlsx`);
     }
 </script>

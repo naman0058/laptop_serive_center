@@ -32,7 +32,9 @@ function generatePageHeader(name, status) {
       'brand/open' : 'Brand List',
       'brand/new' : 'New Brand',
       'engineer/open' : `Engineer's List`,
-      'engineer/new' : 'New Engineer'
+      'engineer/new' : 'New Engineer',
+      'addcash/open' : 'Add Cash',
+      'addcash/new' : 'Add Cash',
 
 
 
@@ -66,7 +68,11 @@ function generatePageHeader(name, status) {
       'brand/open' : 'New Brand',
       'brand/new' : 'New Brand',
       'engineer/open' : 'New Engineer',
-      'engineer/new' : 'New Engineer'
+      'engineer/new' : 'New Engineer',
+      'addcash/open' : 'Add Cash',
+      'addcash/new' : 'Add Cash'
+
+
 
 
 
@@ -100,6 +106,7 @@ function generatePageHeader(name, status) {
       'part' : 'Update Parts',
       'system_type' : 'Update System Type',
       'brand' : 'Update Brand'
+
       
 
       // Add more mappings as needed
@@ -245,7 +252,18 @@ router.post('/insert', upload.fields([ { name: 'image', maxCount: 1 },
 
 
         await queryAsync(`INSERT INTO ${req.body.type} SET ?`, body);
+
+
+        if(req.body.type == 'addcash'){
+            pool.query(`update engineer set balance = balance + '${parseInt(req.body.amount)}' where name = '${req.body.engineer}'`,(err,result)=>{
+                if(err) throw err;
+                else{
+
         res.redirect(`/admin/dashboard/new/${encodeURIComponent(req.body.type)}?message=${encodeURIComponent('Saved Successfully')}`);
+    }
+            })
+        }
+
     } catch (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
@@ -641,5 +659,163 @@ router.get('/partsAvailable/:type/:id',(req,res)=>{
         }
     })
 })
+
+
+
+router.get('/calllist/:type',(req,res)=>{
+
+    if(req.params.type=='pending_cashout'){
+        const query = `
+        SELECT 
+    co.*,
+    s.name, 
+    s.issue,
+    s.created_at,
+    s.sn,
+    s.brand,
+    s.brand_order_no,
+    s.address,
+    s.district,
+    s.number,
+    s.type,
+    s.id,
+    s.status,
+    s.assign_engineer,
+    DATEDIFF(NOW(), s.created_at) AS ageInDays
+FROM 
+    cashout AS co
+LEFT JOIN 
+    slccall AS s ON co.callid = s.id
+WHERE 
+        co.status = 'pending';
+    `;
+    pool.query(query,(err,result)=>{
+        if(err) throw err;
+        else res.render('pending_cashout_calls',{result})
+    })
+    }
+    else{
+        const query = `
+        SELECT name, issue,created_at,sn,brand,brand_order_no, address, district, number,type,id, status, assign_engineer, DATEDIFF(NOW(), created_at) AS ageInDays FROM cccall 
+        WHERE status = 'pending_for_approval'
+        UNION ALL
+        SELECT name,issue,created_at,sn,brand, brand_order_no, address, district, number,type,id, status, assign_engineer, DATEDIFF(NOW(), created_at) AS ageInDays FROM slccall 
+        WHERE status = 'pending_for_approval';
+    `;
+    pool.query(query,(err,result)=>{
+        if(err) throw err;
+        else res.render('pending_for_ta_calls',{result})
+    })
+    }
+
+   
+})
+
+
+router.get('/update/:type/:id/:status', (req, res) => {
+    const { type, id, status } = req.params;
+  
+    // Whitelist valid table names for security
+    const allowedTypes = ["slccall", "cccall"]; // Add valid table names here
+    if (!allowedTypes.includes(type)) {
+      return res.status(400).json({ error: "Invalid table type" });
+    }
+  
+    pool.query(`UPDATE ${type} SET status = ? WHERE id = ?`, [status, id], (err, result) => {
+      if (err) {
+        console.error("Database update error:", err);
+        return res.status(500).json({ error: "Failed to update status" });
+      }
+      res.redirect('/admin/dashboard/calllist/pending_for_approval');
+    });
+  });
+  
+
+
+
+
+
+  
+router.get('/updateAmount/:type/:id/:status', (req, res) => {
+    const { type, id, status } = req.params;
+
+    let updated_at = verify.getCurrentDate()
+  
+    // Whitelist valid table names for security
+    const allowedTypes = ["slccall", "cccall"]; // Add valid table names here
+    if (!allowedTypes.includes(type)) {
+      return res.status(400).json({ error: "Invalid table type" });
+    }
+
+    if(req.params.status == 'closed') {
+  
+    pool.query(`UPDATE ${type} SET status = ? WHERE id = ?`, [status, id], (err, result) => {
+      if (err) {
+        console.error("Database update error:", err);
+        return res.status(500).json({ error: "Failed to update status" });
+      }
+      else{
+        pool.query(`update cashout set status = 'done' , updated_at = ${updated_at} where callid = '${id}'`,(err,result)=>{
+            if(err) throw err;
+            else{
+                pool.query(`update engineer set balance = balance - ${parseInt(req.query.amount)} where name = '${req.query.engineer}'`,(err,result)=>{
+                    if(err) throw err;
+                    else {
+                        res.redirect('/admin/dashboard/calllist/pending_cashout');
+
+                    }
+                })
+            }
+        })
+      }
+    });
+}
+else{
+    pool.query(`delete from cashout where callid = '${id}'`,(err,result)=>{
+           if(err) throw err;
+           else {
+      res.redirect('/admin/dashboard/calllist/pending_cashout');
+            
+           }
+    })
+}
+  });
+  
+
+
+
+  router.get('/cashout/history',(req,res)=>{
+       const query = `
+        SELECT 
+    co.*,
+    s.name, 
+    s.issue,
+    s.created_at,
+    s.sn,
+    s.brand,
+    s.brand_order_no,
+    s.address,
+    s.district,
+    s.number,
+    s.type,
+    s.id,
+    s.status,
+    s.assign_engineer,
+    DATEDIFF(NOW(), s.created_at) AS ageInDays
+FROM 
+    cashout AS co
+LEFT JOIN 
+    slccall AS s ON co.callid = s.id
+WHERE 
+        co.status = 'done';
+    `;
+    pool.query(query,(err,result)=>{
+        if(err) throw err;
+        else {
+        res.render('cashout_calls_history',{result})
+
+        }
+    })
+  })
 
 module.exports = router;
