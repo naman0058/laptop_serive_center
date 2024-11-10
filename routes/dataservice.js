@@ -120,7 +120,7 @@ function generatePageHeader(name, status) {
     return headerMappings[key] || `${name}`; // Default header if no mapping found
   }
 
-  router.get('/list/:name/:status', (req, res) => {
+  router.get('/list/:name/:status',verify.adminAuthenticationToken,(req, res) => {
     let renderPage;
 
     // Determine which page to render based on `name` parameter
@@ -179,7 +179,7 @@ function generatePageHeader(name, status) {
 
 
 
-router.get('/new/:name',  (req, res) => {
+router.get('/new/:name',verify.adminAuthenticationToken , (req, res) => {
     let pageHeader = generatePageHeader(req.params.name, 'new');
     let buttonContent = generateButtonContent(req.params.name, 'new');
 
@@ -276,7 +276,7 @@ router.post('/insert', upload.fields([ { name: 'image', maxCount: 1 },
 
 
 
-router.get('/delete',  async (req, res) => {
+router.get('/delete',verify.adminAuthenticationToken,  async (req, res) => {
     const { type, id } = req.query;
 
     if (!type || !id) {
@@ -517,12 +517,12 @@ router.get('/fetch/:column',(req,res)=>{
 
 
 
-    router.get('/bulk/upload/:type',(req,res)=>{
+    router.get('/bulk/upload/:type',verify.adminAuthenticationToken,(req,res)=>{
         res.render('bulkUpload',{type:req.params.type,msg:req.query.message})
     })
 
 
-    router.get('/bulk/edit/:type',(req,res)=>{
+    router.get('/bulk/edit/:type',verify.adminAuthenticationToken,(req,res)=>{
         res.render('bulkEdit',{type:req.params.type,msg:req.query.message})
     })
 
@@ -637,7 +637,7 @@ router.get('/fetch/:column',(req,res)=>{
 
     
   
-    router.get('/print/:type/:id', (req, res) => {
+    router.get('/print/:type/:id', verify.adminAuthenticationToken, (req, res) => {
         pool.query(`SELECT * FROM ${req.params.type} WHERE id = ?`, [req.params.id], (err, result) => {
             if (err) {
                 console.error(err);
@@ -651,7 +651,7 @@ router.get('/fetch/:column',(req,res)=>{
     
 
 
-router.get('/partsAvailable/:type/:id',(req,res)=>{
+router.get('/partsAvailable/:type/:id', verify.adminAuthenticationToken,(req,res)=>{
     pool.query(`update ${req.params.type} set status = 'parts_available' where id = '${req.params.id}'`,(err,result)=>{
         if(err) throw err;
         else {
@@ -662,7 +662,7 @@ router.get('/partsAvailable/:type/:id',(req,res)=>{
 
 
 
-router.get('/calllist/:type',(req,res)=>{
+router.get('/calllist/:type',verify.adminAuthenticationToken,(req,res)=>{
 
     if(req.params.type=='pending_cashout'){
         const query = `
@@ -712,7 +712,7 @@ WHERE
 })
 
 
-router.get('/update/:type/:id/:status', (req, res) => {
+router.get('/update/:type/:id/:status',verify.adminAuthenticationToken, (req, res) => {
     const { type, id, status } = req.params;
   
     // Whitelist valid table names for security
@@ -736,7 +736,7 @@ router.get('/update/:type/:id/:status', (req, res) => {
 
 
   
-router.get('/updateAmount/:type/:id/:status', (req, res) => {
+router.get('/updateAmount/:type/:id/:status',verify.adminAuthenticationToken, (req, res) => {
     const { type, id, status } = req.params;
 
     let updated_at = verify.getCurrentDate()
@@ -784,7 +784,7 @@ else{
 
 
 
-  router.get('/cashout/history',(req,res)=>{
+  router.get('/cashout/history',verify.adminAuthenticationToken,(req,res)=>{
        const query = `
         SELECT 
     co.*,
@@ -821,7 +821,7 @@ WHERE
 
 
 
-  router.get('/viewDetails/:type/:id', (req, res) => {
+  router.get('/viewDetails/:type/:id',verify.adminAuthenticationToken, (req, res) => {
     var query = `SELECT * FROM ${req.params.type} WHERE id = '${req.params.id}';`
     var query1 = `select * from callsUpdate where callid = ${req.params.id} and type = '${req.params.type}';`
     

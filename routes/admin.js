@@ -85,14 +85,73 @@ pool.query(`select * from admin where email ='${body.email}' and password = '${b
 
 
 
-router.get('/dashboard',verify.adminAuthenticationToken,(req,res)=>{
-  res.render(`dashboard`)
 
+
+router.get('/dashboard',verify.adminAuthenticationToken,  async (req, res) => {
+  try {
+      const warranty_calls = `select count(id) as warranty_calls  from slccall where call_type = 'warranty_calls' and status= 'awaiting_onsite_visit';`
+      const amc_calls = `select count(id) as amc_calls from slccall where call_type = 'amc_calls' and status!= 'closed';`
+      const cc_calls = `select count(id) as cc_calls from cccall where status = 'awaiting_onsite_visit';`
+      const engineer_onsite_calls = `select count(id) as engineer_onsite_calls  from slccall where status= 'onsite_calls';
+`;
+
+const parts_call = `
+SELECT COUNT(id) AS parts_call 
+FROM (
+  SELECT id FROM cccall 
+  WHERE (status = 'waiting_for_parts' OR status = 'parts_available') 
+ 
+  UNION ALL
+  SELECT id FROM slccall 
+  WHERE (status = 'waiting_for_parts' OR status = 'parts_available') 
+ 
+) AS combined_calls;
+`;
+
+
+const pending_ta = `
+SELECT COUNT(id) AS pending_ta 
+FROM (
+  SELECT id FROM cccall WHERE (status = 'pending_for_approval' or status = 'pending_cashout')
+  UNION ALL
+  SELECT id FROM slccall WHERE (status = 'pending_for_approval' or status = 'pending_cashout')
+) AS combined_calls;
+`;
+
+
+const disapprove_calls = `
+SELECT COUNT(id) AS disapprove_calls 
+FROM (
+  SELECT id FROM cccall WHERE status = 'disapprove_calls'
+  UNION ALL
+  SELECT id FROM slccall WHERE status = 'disapprove_calls'
+) AS combined_calls;
+`;
+
+
+
+
+    
+      const sqlQuery = warranty_calls + amc_calls + cc_calls + engineer_onsite_calls + parts_call + pending_ta + disapprove_calls ;
+      const result = await queryAsync(sqlQuery);
+
+
+      
+      // res.json(result);
+      res.render('dashboard',{result})
+  } catch (error) {
+      console.error('Error while fetching user dashboard data:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+
+
+router.get('/dashboard/logout',(req,res)=>{
+  req.session.adminid = null;
+  res.redirect('/admin/login')
 })
-
-
-
-
 
 
 
