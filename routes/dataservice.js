@@ -643,8 +643,8 @@ router.get('/fetch/:column',(req,res)=>{
                 console.error(err);
                 res.status(500).send("An error occurred while processing your request.");
             } else {
-                // res.render('print', { type: req.params.type, result });
-                res.json(result)
+                res.render('print', { type: req.params.type, result });
+                // res.json(result)
             }
         });
     });
@@ -817,5 +817,23 @@ WHERE
         }
     })
   })
+
+
+
+
+  router.get('/viewDetails/:type/:id', (req, res) => {
+    var query = `SELECT * FROM ${req.params.type} WHERE id = '${req.params.id}';`
+    var query1 = `select * from callsUpdate where callid = ${req.params.id} and type = '${req.params.type}';`
+    
+    pool.query(query+query1, (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send("An error occurred while processing your request.");
+        } else {
+            res.render('viewDetails', { type: req.params.type, result });
+            // res.json(result)
+        }
+    });
+});
 
 module.exports = router;

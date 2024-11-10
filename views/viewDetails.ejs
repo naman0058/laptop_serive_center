@@ -35,7 +35,7 @@ body {
                            <h1 style="color: #1A1C21;font-size: 42PX;font-style: normal;font-weight: 800;line-height: normal;text-align: center;">
                             TOTAL SYSTEM SOLUTION </h1>
                             <h4 style="color: #1A1C21;font-weight:lighter;font-size: 32PX;line-height: normal;text-align: center;font-style: italic;">
-                                <%=result[0].brand.toUpperCase()%> AUTHORIZED SERVICE PROVIDER </h4>
+                                <%=result[0][0].brand.toUpperCase()%> AUTHORIZED SERVICE PROVIDER </h4>
                                 <p style="color: #1A1C21;line-height: normal;text-align: center;font-size: 18px;">
                                     1st Floor, 357/3/a/475, Basanta Niketan, Opposite Kanchenjunga Stadium Gate No. 2, Ward No. 11, Siliguri, Darjeeling, 734001 </p>
 
@@ -55,7 +55,7 @@ body {
                                         </div>
                                     
                                         <!-- Right Logo -->
-                                        <img src="https://logo.clearbit.com/<%=result[0].brand%>.com" id="right-logo" alt="Right Logo" style="width: 100px; position: relative;left:10px;">
+                                        <img src="https://logo.clearbit.com/<%=result[0][0].brand%>.com" id="right-logo" alt="Right Logo" style="width: 100px; position: relative;left:10px;">
                                     </div>
 
             
@@ -72,9 +72,9 @@ body {
                                 <tr>
                                     <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 35px;">
                                         <p style="font-weight: 700; color: #1A1C21;">Case Details</p>
-                                        <p style="color: #5E6470;">Service Type : <%=result[0].type%></p>
-                                        <p style="color: #5E6470;">Case ID : <%=result[0].brand_order_no%></p>
-                                        <p style="color: #5E6470;">Service Created Date : <%=result[0].created_at%></p>
+                                        <p style="color: #5E6470;">Service Type : <%=result[0][0].type%></p>
+                                        <p style="color: #5E6470;">Case ID : <%=result[0][0].brand_order_no%></p>
+                                        <p style="color: #5E6470;">Service Created Date : <%=result[0][0].created_at%></p>
                                        
 
                                     </td>
@@ -82,13 +82,13 @@ body {
 
                                     <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 35px;">
                                         <p style="font-weight: 700; color: #1A1C21;">Customer Info</p>
-                                        <p style="color: #5E6470;">Name : <%=result[0].name%></p>
-                                        <p style="color: #5E6470;">Company Name : <%=result[0].company_name%></p>
-                                        <p style="color: #5E6470;">Site Address : <%=result[0].address%></p>
-                                        <p style="color: #5E6470;">Mobile : <%=result[0].number%></p>
-                                        <p style="color: #5E6470;">Contact No : <%=result[0].alternate_number%></p>
-                                        <p style="color: #5E6470;">Email : <%=result[0].email%></p>
-                                        <p style="color: #5E6470;">Product Description : <%=result[0].system_type%></p>
+                                        <p style="color: #5E6470;">Name : <%=result[0][0].name%></p>
+                                        <p style="color: #5E6470;">Company Name : <%=result[0][0].company_name%></p>
+                                        <p style="color: #5E6470;">Site Address : <%=result[0][0].address%></p>
+                                        <p style="color: #5E6470;">Mobile : <%=result[0][0].number%></p>
+                                        <p style="color: #5E6470;">Contact No : <%=result[0][0].alternate_number%></p>
+                                        <p style="color: #5E6470;">Email : <%=result[0][0].email%></p>
+                                        <p style="color: #5E6470;">Product Description : <%=result[0][0].system_type%></p>
 
 
 
@@ -104,8 +104,8 @@ body {
 
                                     <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 35px;">
                                         <p style="font-weight: 700; color: #1A1C21;">Product Details</p>
-                                        <p style="color: #5E6470;">Model : <%=result[0].model%></p>
-                                        <p style="color: #5E6470;">Serial No. : <%=result[0].sn%></p>
+                                        <p style="color: #5E6470;">Model : <%=result[0][0].model%></p>
+                                        <p style="color: #5E6470;">Serial No. : <%=result[0][0].sn%></p>
                                     </td>
 
 
@@ -115,15 +115,15 @@ body {
                                 <tr>
                                     <td style="padding-bottom: 13px;">
                                         <p style="color: #5E6470;">Problem Description </p>
-                                        <p style="font-weight: 700; color: #1A1C21;"><%=result[0].issue%></p>
+                                        <p style="font-weight: 700; color: #1A1C21;"><%=result[0][0].issue%></p>
                                     </td>
                                     <td style="text-align: center; padding-bottom: 13px;">
                                         <p style="color: #5E6470;">Engineer Name</p>
-                                        <p style="font-weight: 700; color: #1A1C21;"><%=result[0].assign_engineer%></p>
+                                        <p style="font-weight: 700; color: #1A1C21;"><%=result[0][0].assign_engineer%></p>
                                     </td>
                                     <td style="text-align: end; padding-bottom: 13px;">
                                         <p style="color: #5E6470;">Issue Resolve Date</p>
-                                        <p style="font-weight: 700; color: #1A1C21;"><%=result[0].updated_at%></p>
+                                        <p style="font-weight: 700; color: #1A1C21;"><%=result[0][0].updated_at%></p>
                                     </td>
                                 </tr>
                                 <!-- <tr>
@@ -220,7 +220,81 @@ body {
             </tbody>
            
         </table>
+
+
+        
+           
+        <% result[1].forEach(report => { %>
+            
+            <% if(result[1][0].serviceReport){ %>
+
+            <div class="report-section">
+              <h3>Service Report</h3>
+              <div class="thumbnail-container">
+                <% report.serviceReport.split(',').forEach(photo => { %>
+                    <img src="/images/<%= photo.trim() %>" alt="Service Part" onclick="openModal(this.src)">
+                  <% }) %>
+              </div>
+            </div>
+
+            <% } %>
+
+
+            <% if(result[1][0].defectivePartsPhoto){ %>
+
+        
+            <div class="report-section">
+              <h3>Defective Parts Photos</h3>
+              <div class="thumbnail-container">
+                <% report.defectivePartsPhoto.split(',').forEach(photo => { %>
+                  <img src="/images/<%= photo.trim() %>" alt="Defective Part" onclick="openModal(this.src)">
+                <% }) %>
+              </div>
+            </div>
+
+            <% } %>
+
+
+            <% if(result[1][0].goodPartsPhoto){ %>
+
+        
+            <div class="report-section">
+              <h3>Good Parts Photo</h3>
+              <div class="thumbnail-container">
+                <% report.goodPartsPhoto.split(',').forEach(photo => { %>
+                    <img src="/images/<%= photo.trim() %>" alt="Good Parts" onclick="openModal(this.src)">
+                  <% }) %>
+              </div>
+            </div>
+            <% } %>
+          <% }) %>
+
+
+          <h3>Parts MEMO Report</h3>
+          <p><%=result[1][0].partsMemoReport%></p>
+
+          <h3>Diagnostic MEMO Report</h3>
+          <p><%=result[1][0].diagnosticReport%></p>
+
+
+          
+          <h3>Good Parts Name</h3>
+          <p><%=result[1][0].goodPartsName%></p>
+
+
+          <h3>Defective Parts Name</h3>
+          <p><%=result[1][0].defectivePartsName%></p>
+        </div>
     </div>
+
+
+
+  
+      <!-- Modal for Image Zoom -->
+      <div class="zoom-modal" id="zoomModal">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img id="zoomedImage" src="" alt="Zoomed Image">
+      </div>
 
 
 <style>
@@ -250,6 +324,69 @@ body {
         }
 </style>
 
+
+<style>
+   
+    .report-container {
+      max-width: 600px;
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .report-header {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .report-section {
+      margin-bottom: 20px;
+    }
+    .report-section h3 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .thumbnail-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .thumbnail-container img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .thumbnail-container img:hover {
+      transform: scale(1.2);
+    }
+    .zoom-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .zoom-modal img {
+      max-width: 90%;
+      max-height: 90%;
+    }
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #fff;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+  </style>
+
 <div class="button-container">
     <button class="download-button" onclick="downloadPDF()">Download PDF</button>
 </div>
@@ -260,6 +397,17 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
 <script>
+
+
+function openModal(src) {
+    document.getElementById('zoomedImage').src = src;
+    document.getElementById('zoomModal').style.display = 'flex';
+  }
+
+  // Function to close the zoom modal
+  function closeModal() {
+    document.getElementById('zoomModal').style.display = 'none';
+  }
 
 window.onload = function() {
 
