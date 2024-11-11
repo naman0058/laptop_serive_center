@@ -27,7 +27,7 @@
             <div class="card" style="margin-top: 20px;">
                 <div class="card-header d-flex justify-content-between">
                     <div class="header-title">
-                        <h4 class="card-title">Cashout Calls</h4>
+                        <h4 class="card-title">Parts Calls</h4>
                     </div>
                    
                   
@@ -52,10 +52,10 @@
                                         <th>Assign Engineer</th>
                                         <th>Address</th>
                                         <th>Issue</th>
+                                        <th>Parts Required</th>
                                         <th>SN</th>
                                         <th>Number</th>
-                                        <th>Amount</th>
-                                        <th>Reason</th>
+                                        <th>Type</th>
                                         <th>Created At</th>
                                         <th>Actions</th>
                                     </tr>
@@ -73,18 +73,20 @@
                                             <td><%= item.assign_engineer %></td>
                                             <td><%= item.address %></td>
                                             <td><%= item.issue %></td>
+                                            <td><%=item.defectivePartsName%></td>
                                             <td><%= item.sn %></td>
                                             <td><%= item.number %></td>
-                                            <td><%= item.amount%></td>
-                                            <td><%= item.explaination%></td>
-
+                                            <td><%= item.type%></td>
 
                                             <td><%= item.created_at %></td>
 
                                             <td>
+
                                                 <a href="/admin/dashboard/viewDetails/<%=item.type%>/<%= item.id %>" target="_blank" class="btn btn-dark">View Details</a>
-                                                <a href="/admin/dashboard/updateAmount/<%=item.type%>/<%= item.id %>/closed?amount=<%=item.amount%>&engineer=<%=item.assign_engineer%>" class="btn btn-primary">Accept</a>
-                                                <a href="/admin/dashboard/updateAmount/<%=item.type%>/<%= item.id %>/reject" class="btn btn-danger">Reject</a>
+
+
+                                                        
+                                                <a href="/admin/dashboard/availableParts/<%=item.type%>/<%= item.id %>" class="btn btn-success">Parts Available</a>
                                                 
                                                 
                                             </td>

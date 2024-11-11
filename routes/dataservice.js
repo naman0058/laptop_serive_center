@@ -263,6 +263,7 @@ router.post('/insert', upload.fields([ { name: 'image', maxCount: 1 },
     }
             })
         }
+        res.redirect(`/admin/dashboard/new/${encodeURIComponent(req.body.type)}?message=${encodeURIComponent('Saved Successfully')}`);
 
     } catch (err) {
         console.error(err);
@@ -420,6 +421,15 @@ router.get('/fetch/:column',(req,res)=>{
     })
 
 
+
+    router.get('/fetchnumber/:number/:type',(req,res)=>{
+        pool.query(`select * from ${req.params.type} where number = '${req.params.number}' limit 1`,(err,result)=>{
+            if(err) throw err;
+            else res.json(result)
+        })
+    })
+
+
     // router.get('/filter', (req, res) => {
     //     try {
     //         const filters = req.query;
@@ -515,6 +525,75 @@ router.get('/fetch/:column',(req,res)=>{
     
     
 
+
+
+    router.get('/cashout/filter', (req, res) => {
+        try {
+            const filters = req.query;
+            let query = ` SELECT 
+    co.*,
+    s.name, 
+    s.issue,
+    s.created_at,
+    s.sn,
+    s.brand,
+    s.brand_order_no,
+    s.address,
+    s.district,
+    s.number,
+    s.type,
+    s.id,
+    s.status,
+    s.assign_engineer,
+    DATEDIFF(NOW(), s.created_at) AS ageInDays
+FROM 
+    cashout AS co
+LEFT JOIN 
+    slccall AS s ON co.callid = s.id WHERE 1=1`; // Base query
+    
+            // Append conditions to the query based on the filters
+            for (const [key, value] of Object.entries(filters)) {
+                if (value && key !== 'from_date' && key !== 'to_date' && key !== 'status') {
+                    query += ` AND ${key} = '${value}'`;
+                }
+            }
+    
+            // Append status condition
+            if (filters.status && filters.status !== 'closed') {
+                query += ` AND status != 'closed'`;
+            } else if (filters.status === 'closed') {
+                query += ` AND status = 'closed'`;
+            }
+    
+            // Append from_date and to_date conditions
+            if (filters.from_date) {
+                query += ` AND created_at >= '${filters.from_date}'`;
+            }
+            if (filters.to_date) {
+                query += ` AND created_at <= '${filters.to_date}'`;
+            }
+    
+            // Execute the query
+            pool.query(query, (err, results) => {
+                if (err) {
+                    console.error('Error fetching filtered data:', err);
+                    return res.status(500).json({ success: false, error: 'Database error' });
+                }
+    
+                // Calculate the age in days for each record
+                results = results.map(item => {
+                    const createdAt = moment(item.created_at);
+                    const ageInDays = moment().diff(createdAt, 'days');
+                    return { ...item, age: ageInDays };
+                });
+    
+                res.json({ success: true, data: results });
+            });
+        } catch (error) {
+            console.error('Error processing request:', error);
+            res.status(500).json({ success: false, error: 'Server error' });
+        }
+    });
 
 
     router.get('/bulk/upload/:type',verify.adminAuthenticationToken,(req,res)=>{
@@ -694,6 +773,51 @@ WHERE
         else res.render('pending_cashout_calls',{result})
     })
     }
+    else if(req.params.type=='waiting_for_parts'){
+        const query = `
+       SELECT 
+    main.name, 
+    main.issue,
+    main.created_at,
+    main.sn,
+    main.brand,
+    main.brand_order_no,
+    main.address,
+    main.district,
+    main.number,
+    main.type,
+    main.id,
+    main.status,
+    main.assign_engineer,
+    main.ageInDays,
+    callsUpdate.defectivePartsName -- This will select all columns from callsUpdate where callid matches id
+FROM 
+    (
+        SELECT name, issue, created_at, sn, brand, brand_order_no, address, district, number, type, id, status, assign_engineer, 
+               DATEDIFF(NOW(), created_at) AS ageInDays 
+        FROM cccall 
+        WHERE status = 'waiting_for_parts'
+        
+        UNION ALL
+        
+        SELECT name, issue, created_at, sn, brand, brand_order_no, address, district, number, type, id, status, assign_engineer, 
+               DATEDIFF(NOW(), created_at) AS ageInDays 
+        FROM slccall 
+        WHERE status = 'waiting_for_parts'
+    ) AS main
+LEFT JOIN 
+    callsUpdate 
+ON 
+    callsUpdate.callid = main.id;
+
+    `;
+    pool.query(query,(err,result)=>{
+        if(err) throw err;
+        else res.render('parts_calls',{result})
+        // else res.json(result)
+    })
+    }
+    
     else{
         const query = `
         SELECT name, issue,created_at,sn,brand,brand_order_no, address, district, number,type,id, status, assign_engineer, DATEDIFF(NOW(), created_at) AS ageInDays FROM cccall 
@@ -734,6 +858,44 @@ router.get('/update/:type/:id/:status',verify.adminAuthenticationToken, (req, re
 
 
 
+  router.get('/availableParts/:type/:callid',verify.adminAuthenticationToken,(req,res)=>{
+    var query = `select * from callsUpdate where callid = '${req.params.callid}';`
+    var query1 = `select * from part where quantity > 0;`
+    pool.query(query+query1,(err,result)=>{
+        if(err) throw err;
+        else res.render('availableParts',{result,type:req.params.type,callid:req.params.callid})
+    })
+  })
+
+
+  router.get('/assignItem',verify.adminAuthenticationToken,(req,res)=>{
+   
+   pool.query(`select * from availableParts where callid = '${req.query.callid}' and partid = '${req.query.partid}' and type = '${req.query.type}'`,(err,result)=>{
+    if(err) throw err;
+    else if(result[0]){
+        res.json({msg:'Already Assign'})
+    }
+    else{
+        pool.query(`insert into availableParts(type,callid,partid,created_at) values('${req.query.type}','${req.query.callid}' , '${req.query.partid}' , '${verify.getCurrentDate()}')`,(err,result)=>{
+            if(err) throw err;
+            else{
+                pool.query(`update ${req.query.type} set status = 'parts_available' where id = '${req.query.callid}'`,(err,result)=>{
+                    if(err) throw err;
+                    else {
+                        pool.query(`update part set quantity = quantity-1 where id = '${req.query.partid}'`,(err,result)=>{
+                            if(err) throw err;
+                            else{
+                                res.json({msg:'success'})
+                            }
+                        })
+                    }
+                })
+            }
+        })
+    }
+   })
+  
+  })
 
   
 router.get('/updateAmount/:type/:id/:status',verify.adminAuthenticationToken, (req, res) => {

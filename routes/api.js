@@ -44,7 +44,7 @@ router.get('/user/dashboard', verify.userAuthenticationToken, async (req, res) =
     try {
         const engineer_details = `select balance from engineer where name = '${req.data}';`
         const warranty_calls = `select count(id) as warranty_calls  from slccall where call_type = 'warranty_calls' and status= 'awaiting_onsite_visit' and assign_engineer = '${req.data}';`
-        const amc_calls = `select count(id) as amc_calls from slccall where call_type = 'amc_calls' and status!= 'closed' and assign_engineer = '${req.data}';`
+        const amc_calls = `select count(id) as amc_calls from slccall where call_type = 'amc_calls' and status= 'awaiting_onsite_visit' and assign_engineer = '${req.data}';`
         const cc_calls = `select count(id) as cc_calls from cccall where status = 'awaiting_onsite_visit' and assign_engineer = '${req.data}';`
         const engineer_onsite_calls = `select count(id) as engineer_onsite_calls  from slccall where status= 'onsite_calls' and assign_engineer = '${req.data}';
 `;
@@ -121,7 +121,7 @@ router.get('/user/dashboard/calls/:callType', verify.userAuthenticationToken, as
                 query = `
                     SELECT *, DATEDIFF(NOW(), created_at) AS ageInDays FROM slccall 
                     WHERE call_type = 'amc_calls' 
-                    AND status != 'closed' 
+                    AND status = 'awaiting_onsite_visit' 
                     AND assign_engineer = '${engineerId}';
                 `;
                 break;
@@ -187,12 +187,23 @@ router.get('/user/dashboard/callsDetails/:type', verify.userAuthenticationToken,
   console.log('query',req.query)
   console.log('params',req.params)
 
-    pool.query(`select * from ${req.params.type} where id = '${req.query.callid}'`,(err,result)=>{
+    pool.query(`select * from ${req.params.type} t where t.id = '${req.query.callid}'`,(err,result)=>{
     if(err) throw err;
     else {
         res.json(result)
     }
    })
+})
+
+
+router.get('/availableParts',(req,res)=>{
+    pool.query(`select a.* ,
+        (select p.name from part p where p.id = a.partid) as partname,
+        (select p.description from part p where p.id = a.partid) as partmodel
+         from availableParts a where a.callid = '${req.query.callid}' and a.type = '${req.query.type}'`,(err,result)=>{
+        if(err) throw err;
+        else res.json(result)
+    })
 })
 
 

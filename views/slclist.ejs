@@ -55,7 +55,7 @@
 
                                 <% Object.keys(result[0]).forEach(key => { %>
                                     <% if (key !== 'type') { %>
-                                        <% if (key === 'tss_order_no' || key === 'name' || key === 'address' || key === 'brand' || key === 'system_type' || key === 'assign_engineer' || key === 'number' || key === 'alternate_number' || key==='s/n') { %>
+                                        <% if ( key == 'district' || key === 'name'  || key === 'brand' || key === 'system_type' || key === 'assign_engineer' || key==='s/n') { %>
                                         <div class="form-group col-md-3 col-lg-3">
                                             <label class="form-label" for="<%= key %>"><%= key.charAt(0).toUpperCase() + key.slice(1) %>:</label>
                                             <% if (key === 'account') { %>
@@ -76,7 +76,7 @@
                                                     <%= key === 'pincode' ? "onchange=fetchLocation()" : '' %> 
                                                     <%= key === 'number' ? "onchange=fetchDataByNumber()" : '' %> 
                                                     placeholder="<%= key.charAt(0).toUpperCase() + key.slice(1) %>" 
-                                                    <%= (key === 'city' || key === 'district') ? 'readonly required' : '' %>
+                                                    <%= (key === 'city') ? 'readonly required' : '' %>
                                                     <%= key !== 'alternate_number' && key !== 'email' && key !== 'address' && key !== 'product' && key !== 'model' && key !== 'tss_order_no' ? 'required' : '' %>
                                                 >
                                             <% } %>
@@ -120,6 +120,7 @@
                             <button type="button" class="btn btn-primary"><%= buttonContent %></button>
                         </a>
                         <button type="button" class="btn btn-success" onclick="downloadExcel()">Download Excel</button>
+                        <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search Anything" title="Search Anything">
                     </div>
                     
 
@@ -129,7 +130,7 @@
                         <p style="font-weight: bold; color: black; text-align: center;">No Data Found</p>
                     <% } else { %>
                         <div class="table-responsive">
-                            <table id="input-datatable" class="table" data-toggle="data-table-key-filter">
+                            <table id="myTable" class="table" data-toggle="data-table-key-filter">
                                 <thead>
                                     <tr>
                                         <!-- Define column headers in the specific order -->
@@ -138,6 +139,7 @@
                                         <th>Age</th>
                                         <th>Brand</th>
                                         <th>Brand Order No</th>
+                                        <th>Pincode</th>
                                         <th>District</th>
                                         <th>Assign Engineer</th>
                                         <th>Address</th>
@@ -147,7 +149,7 @@
                                         <th>Number</th>
                                         <th>Alternate Number</th>
                                         <th>Status</th>
-                                        <th>Calls Type</th>
+                                        <th>Call Type</th>
                                         <th>Type</th>
                                         <th>Created At</th>
                                         <th>Actions</th>
@@ -162,6 +164,7 @@
                                             <td><%= item.age%></td>
                                             <td><%= item.brand %></td>
                                             <td><%= item.brand_order_no %></td>
+                                            <td><%= item.pincode%></td>
                                             <td><%= item.district %></td>
                                             <td><%= item.assign_engineer %></td>
                                             <td><%= item.address %></td>
@@ -177,10 +180,10 @@
                                             <td><%= item.created_at %></td>
 
                                             <td>
+                                                <a href="/admin/dashboard/print/<%= name %>/<%= item.id %>" class="btn btn-dark">View Detials</a>
+                                                
                                                 <a href="/admin/dashboard/update/<%= name %>/<%= item.id %>" class="btn btn-primary">Edit</a>
-                                                <% if(item.status == 'waiting_for_parts') { %>
-                                                <a href="/admin/dashboard/partsAvailable/<%= name %>/<%= item.id %>" class="btn btn-secondary">Parts Available</a>
-                                                   <% } %>
+                                               
                                                 <button class="btn btn-danger" onclick="deleteItem('<%= name %>', <%= item.id %>)">Delete</button>
                                                 <a href="/admin/dashboard/print/<%= name %>/<%= item.id %>" class="btn btn-dark">Print</a>
 
@@ -241,7 +244,7 @@
 function updateTable(data) {
 
     console.log(data)
-    const tableBody = document.querySelector('#input-datatable tbody');
+    const tableBody = document.querySelector('#myTable tbody');
     tableBody.innerHTML = ''; // Clear current table rows
 
     data.forEach(item => {
@@ -249,7 +252,7 @@ function updateTable(data) {
 
         // Add cells in the specific column order
         const columns = [
-            'id','name', 'age', 'brand', 'brand_order_no', 'district', 
+            'id','name', 'age', 'brand', 'brand_order_no','pincode', 'district', 
             'assign_engineer', 'address', 'tss_order_no', 
             'issue', 'sn', 'number', 'alternate_number' , 'status', 'call_type', 'type' , 'created_at'
         ];
@@ -265,10 +268,10 @@ function updateTable(data) {
         // Add the Actions cell
         const actionsCell = document.createElement('td');
         actionsCell.innerHTML = `
-            <a href="/admin/dashboard/update/slccall/${item.id}" class="btn btn-primary">Edit</a>`
-           if(item.status == 'waiting_for_parts'){
-            actionsCell.innerHTML+=`<a href="/admin/dashboard/partsAvailable/slccall/${item.id}" class="btn btn-secondary">Parts Available</a>`
-           }
+            
+           <a href="/admin/dashboard/print/slccall/${item.id}" class="btn btn-secondary">View Details</a>
+        <a href="/admin/dashboard/update/slccall/${item.id}" class="btn btn-primary">Edit</a>`
+         
            actionsCell.innerHTML+=`<button class="btn btn-danger" onclick="deleteItem('slccall', ${item.id})">Delete</button>
            <a href="/admin/dashboard/print/slccall/${item.id}" class="btn btn-secondary">Print</a>
         `;
@@ -450,7 +453,7 @@ function updateTable(data) {
     function downloadExcel() {
     const status = document.getElementById('status').value;
 
-        const table = document.getElementById('input-datatable');
+        const table = document.getElementById('myTable');
         const ws = XLSX.utils.table_to_sheet(table, { raw: true });
 
         // Remove the last column (Actions) from the sheet
@@ -477,4 +480,58 @@ function updateTable(data) {
 
         XLSX.writeFile(wb, `occ_${status}_call.xlsx`);
     }
+</script>
+
+<script>
+// function myFunction() {
+//     var input, filter, table, tr, td, i, txtValue;
+//     input = document.getElementById("myInput");
+//     filter = input.value.toUpperCase();
+//     table = document.getElementById("myTable");
+//     tr = table.getElementsByTagName("tr");
+    
+//     for (i = 1; i < tr.length; i++) { // Start from 1 to skip header row
+//       td = tr[i].getElementsByTagName("td")[1]; // Change index to 1 for "Name" column
+//       if (td) {
+//         txtValue = td.textContent || td.innerText;
+//         if (txtValue.toUpperCase().indexOf(filter) > -1) {
+//           tr[i].style.display = "";
+//         } else {
+//           tr[i].style.display = "none";
+//         }
+//       }
+//     }
+// }
+
+
+function myFunction() {
+    var input, filter, table, tr, td, i, j, txtValue, rowMatches;
+    input = document.getElementById("myInput");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("myTable");
+    tr = table.getElementsByTagName("tr");
+
+    for (i = 1; i < tr.length; i++) { // Start from 1 to skip header row
+        tr[i].style.display = "none"; // Initially hide the row
+        td = tr[i].getElementsByTagName("td");
+        rowMatches = false;
+
+        // Loop through all cells in the row
+        for (j = 0; j < td.length; j++) {
+            if (td[j]) {
+                txtValue = td[j].textContent || td[j].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    rowMatches = true;
+                    break;
+                }
+            }
+        }
+
+        // If any cell in the row matches the filter, display the row
+        if (rowMatches) {
+            tr[i].style.display = "";
+        }
+    }
+}
+
 </script>

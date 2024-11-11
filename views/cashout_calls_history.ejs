@@ -24,11 +24,59 @@
         <div class="col-sm-12">
            
 
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="header-title">
+                        <h4 class="card-title">Apply Filters</h4>
+                        <input type="hidden" id="type" value="cashout">
+
+                    </div>
+                    
+                </div>
+                <div class="card-body">
+                    <% if (!result[0]) { %>
+                        <p style="font-weight: bold; color: black; text-align: center;">No Data Found</p>
+                    <% } else { %>
+                        <form id="filterForm">
+                            <div class="row">
+                                <div class="form-group col-md-6 col-lg-6">
+                                    <label class="form-label" for="from_date">From Date</label>
+                                    <input type="date" id="from_date" name="from_date" class="form-control">
+                                    
+
+                                    </div>
+
+
+                                    <div class="form-group col-md-6 col-lg-6">
+                                        <label class="form-label" for="to_date">To Date</label>
+                                        <input type="date" id="to_date" name="to_date" class="form-control">
+                                        
+    
+                                        </div>
+
+                               
+                            </div>
+                            
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <button type="button" class="btn btn-primary" onclick="applyFilters()">Filter</button>
+                                    <button type="button" class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+                                </div>
+                            </div>
+                        </form>
+                    <% } %>
+                </div>
+            </div>
+
+
             <div class="card" style="margin-top: 20px;">
                 <div class="card-header d-flex justify-content-between">
                     <div class="header-title">
                         <h4 class="card-title">Cashout Calls History</h4>
+
                     </div>
+                    <button type="button" class="btn btn-success" onclick="downloadExcel()">Download Excel</button>
                    
                   
                     
@@ -39,7 +87,7 @@
                         <p style="font-weight: bold; color: black; text-align: center;">No Data Found</p>
                     <% } else { %>
                         <div class="table-responsive">
-                            <table id="input-datatable" class="table" data-toggle="data-table-key-filter">
+                            <table id="myTable" class="table" data-toggle="data-table-key-filter">
                                 <thead>
                                     <tr>
                                         <!-- Define column headers in the specific order -->
@@ -104,6 +152,9 @@
     const params = new URLSearchParams();
 
     formData.forEach((value, key) => {
+       console.log('value',value)
+       console.log('key',key)
+
         if (value) {
             params.append(key, value);
         }
@@ -115,11 +166,10 @@
     if (fromDate) params.append('from_date', fromDate);
     if (toDate) params.append('to_date', toDate);
 
-    const status = document.getElementById('status').value;
 
 
 
-    fetch(`/admin/dashboard/filter/?${params.toString()}&status=${status.toString()}`)
+    fetch(`/admin/dashboard/cashout/filter/?${params.toString()}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -137,7 +187,8 @@
 function updateTable(data) {
 
     console.log(data)
-    const tableBody = document.querySelector('#input-datatable tbody');
+    const tableBody = document.querySelector('#myTable tbody');
+
     tableBody.innerHTML = ''; // Clear current table rows
 
     data.forEach(item => {
@@ -146,8 +197,8 @@ function updateTable(data) {
         // Add cells in the specific column order
         const columns = [
             'id','name', 'age', 'brand', 'brand_order_no', 'district', 
-            'assign_engineer', 'address', 'tss_order_no', 
-            'issue', 'sn', 'number', 'alternate_number' , 'status', 'call_type', 'type' , 'created_at'
+            'assign_engineer', 'address', 
+            'issue', 'sn', 'number', 'amount' , 'explaination', 'created_at'
         ];
 
 
@@ -160,14 +211,7 @@ function updateTable(data) {
 
         // Add the Actions cell
         const actionsCell = document.createElement('td');
-        actionsCell.innerHTML = `
-            <a href="/admin/dashboard/update/slccall/${item.id}" class="btn btn-primary">Edit</a>`
-           if(item.status == 'waiting_for_parts'){
-            actionsCell.innerHTML+=`<a href="/admin/dashboard/partsAvailable/slccall/${item.id}" class="btn btn-secondary">Parts Available</a>`
-           }
-           actionsCell.innerHTML+=`<button class="btn btn-danger" onclick="deleteItem('slccall', ${item.id})">Delete</button>
-           <a href="/admin/dashboard/print/slccall/${item.id}" class="btn btn-secondary">Print</a>
-        `;
+       
         row.appendChild(actionsCell);
 
         // Append row to table body
@@ -366,3 +410,40 @@ function updateTable(data) {
         XLSX.writeFile(wb, `occ_${status}_call.xlsx`);
     }
 </script>
+
+
+
+<script>
+    function downloadExcel() {
+
+        const table = document.getElementById('myTable');
+        const ws = XLSX.utils.table_to_sheet(table, { raw: true });
+
+        // Remove the last column (Actions) from the sheet
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let C = range.e.c; C >= range.s.c; --C) {
+            const cell = ws[XLSX.utils.encode_cell({ r: range.s.r, c: C })];
+            if (cell && cell.v === 'Actions') {
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    delete ws[XLSX.utils.encode_cell({ r: R, c: C })];
+                }
+                for (let i = C; i < range.e.c; ++i) {
+                    for (let R = range.s.r; R <= range.e.r; ++R) {
+                        ws[XLSX.utils.encode_cell({ r: R, c: i })] = ws[XLSX.utils.encode_cell({ r: R, c: i + 1 })];
+                    }
+                }
+                range.e.c--;
+                break;
+            }
+        }
+        ws['!ref'] = XLSX.utils.encode_range(range);
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+        XLSX.writeFile(wb, `cashout_calls_history.xlsx`);
+    }
+</script>
+
+
+

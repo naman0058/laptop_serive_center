@@ -29,68 +29,43 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="header-title">
-                            <h4 class="card-title"><%= pageHeader %></h4>
-                            <p style="margin-top: 20px;color: green;font-weight: bold;"><%=msg%></p>
+                            <h4 class="card-title">Parts Assign</h4>
+                            <p style="margin-top: 20px;color: black;font-weight: bold;">Required Parts : <%=result[0][0].defectivePartsName%></p>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="new-user-info">
-                            <form action="/admin/dashboard/insert" method="post" enctype="multipart/form-data">
-                                <div class="row">
-                                    <input type="hidden" name="type" id="type" value="<%=name%>">
-                                    <% columns.forEach(column => { %>
-                                        <div class="form-group col-md-6">
-                                            <label class="form-label" for="<%= column %>"><%= column.charAt(0).toUpperCase() + column.slice(1) %>:</label>
-                                            <% if (column === 'account') { %>
-                                                <select class="form-control" id="<%= column %>" name="<%= column %>" required>
-                                                    <option value="active">Active</option>
-                                                    <option value="inactive">Inactive</option>
-                                                </select>
-                                            <% } else if (column === 'brand' || column === 'system_type' || column === 'engineer' || column === 'vendor') { %>
-                                                <select class="form-control" id="<%= column %>" name="<%= column %>" required>
-                                                    <option value="">Select <%= column.charAt(0).toUpperCase() + column.slice(1) %></option>
-                                                </select>
-                                            <% } else if(column === 'call_type') { %>
-                                                <select class="form-control" id="<%= column %>" name="<%= column %>" required>
-                                                    <option value="warranty_calls">Warranty Calls</option>
-                                                    <option value="amc_calls">AMC Calls</option>
-                                                </select>
-                                               <% } else { %>
-                                                <!-- <input 
-                                                    type="<%= (column === 'image' || column === 'aadhar_card_image' || column === 'pan_card_image' || column === 'selfie' || column === 'qr_code') ? 'file' : 'text' %>" 
-                                                    class="form-control" 
-                                                    required
-                                                    id="<%= column %>" 
-                                                    name="<%= column %>" 
-                                                    <%= column === 'pincode' ? "onchange=fetchLocation()" : '' %> 
-                                                    <%= column === 'number' ? "onchange=fetchDataByNumber()" : '' %> 
-                                                    placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>" 
-                                                    <%= (column === 'city' || column === 'district' || column === 'tss_order_no') ? 'readonly required' : '' %>
-                                                    <%= column !== 'alternate_number' && column !== 'email' && column !== 'address' && column !== 'product' && column !== 'model' && column !== 'tss_order_no' ? 'required' : '' %>
-                                                > -->
-                                                <input 
-    type="<%= (column === 'image' || column === 'aadhar_card_image' || column === 'pan_card_image' || column === 'selfie' || column === 'qr_code') ? 'file' : 'text' %>" 
-    class="form-control" 
-    id="<%= column %>" 
-    name="<%= column %>" 
-    <%= column === 'pincode' ? "onchange=fetchLocation()" : '' %> 
-    <%= column === 'number' ? "onchange=fetchDataByNumber()" : '' %> 
-    placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>" 
-    <%= (column === 'city' || column === 'district' || column === 'tss_order_no') ? 'readonly required' : '' %>
-    <%= (column !== 'alternate_number' && column !== 'email' && column !== 'address') ? 'required' : '' %>
->
+                            <div class="table-responsive">
+                                <table id="myTable" class="table" data-toggle="data-table-key-filter">
+                            <tr>
+                                <th>Part Name</th>
+                                <th>Model No.</th>
+                                <!-- <th>Quantity</th> -->
+                                <th>Action</th>
+                            </tr>
 
-                                            <% } %>
-                                        </div>
-                                    <% }) %>
-                                    
-                                    
-                                </div>
-                                <hr>
-                               
-                               
-                                <button type="submit" class="btn btn-primary">Add <%=buttonContent%></button>
-                            </form>
+                            <tbody>
+                                <% result[1].forEach(item => { %>
+                                    <tr>
+                                        <!-- Display data in the specific order -->
+                                        <td><%= item.name %></td>
+                                        <td><%= item.description%></td>
+                                        <!-- <td><%= item.quantity %></td> -->
+                                        
+                                        
+
+                                        <td>
+
+                                           
+                                            <button class="btn btn-success" onclick="assignItem('<%= callid %>', <%= item.id %> , '<%=type%>')">Assign</button>
+                                            
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+
+                           </table>
+                           </div>
                         </div>
                     </div>
                 </div>
@@ -229,4 +204,40 @@
                 });
         }
     }
+
+
+
+
+
+
+
+
+    function assignItem(callid, id,type) {
+    // Ask the user for the password
+    
+    // Check if the password matches the predefined password
+   
+        // If the password is correct, proceed with deletion
+        fetch(`/admin/dashboard/assignItem/?callid=${callid}&partid=${id}&type=${type}`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.msg == 'success') {
+                alert('Item Assign successfully');
+                location.reload();  // Reload the page to reflect changes
+            }
+            else if(data.msg == 'Already Assign'){
+                alert('Already Assign')
+            } 
+            else {
+                alert('Failed to assign item');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+   
+}
+
+ 
+
 </script>

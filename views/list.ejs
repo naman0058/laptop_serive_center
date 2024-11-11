@@ -108,6 +108,8 @@
                             <button type="button" class="btn btn-primary"><%= buttonContent %></button>
                         </a>
                         <button type="button" class="btn btn-success" onclick="downloadExcel()">Download Excel</button>
+                        <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search Anything" title="Search Anything">
+
                     </div>
 
                 </div>
@@ -116,7 +118,7 @@
                         <p style="font-weight: bold; color: black; text-align: center;">No Data Found</p>
                     <% } else { %>
                         <div class="table-responsive">
-                            <table id="input-datatable" class="table" data-toggle="data-table-key-filter">
+                            <table id="myTable" class="table" data-toggle="data-table-key-filter">
                                 <thead>
                                     <tr>
                                         <% if (result.length > 0) { %>
@@ -208,7 +210,7 @@
 }
 
 function updateTable(data) {
-    const tableBody = document.querySelector('#input-datatable tbody');
+    const tableBody = document.querySelector('#myTable tbody');
     tableBody.innerHTML = '';
 
     data.forEach(item => {
@@ -383,7 +385,7 @@ function updateTable(data) {
     function downloadExcel() {
         const type =   document.getElementById('type').value;
 
-        const table = document.getElementById('input-datatable');
+        const table = document.getElementById('myTable');
         const ws = XLSX.utils.table_to_sheet(table, { raw: true });
 
         // Remove the last column (Actions) from the sheet
@@ -411,3 +413,58 @@ function updateTable(data) {
         XLSX.writeFile(wb, `${type}.xlsx`);
     }
 </script>
+
+
+<script>
+    // function myFunction() {
+    //     var input, filter, table, tr, td, i, txtValue;
+    //     input = document.getElementById("myInput");
+    //     filter = input.value.toUpperCase();
+    //     table = document.getElementById("myTable");
+    //     tr = table.getElementsByTagName("tr");
+        
+    //     for (i = 1; i < tr.length; i++) { // Start from 1 to skip header row
+    //       td = tr[i].getElementsByTagName("td")[1]; // Change index to 1 for "Name" column
+    //       if (td) {
+    //         txtValue = td.textContent || td.innerText;
+    //         if (txtValue.toUpperCase().indexOf(filter) > -1) {
+    //           tr[i].style.display = "";
+    //         } else {
+    //           tr[i].style.display = "none";
+    //         }
+    //       }
+    //     }
+    // }
+    
+    
+    function myFunction() {
+        var input, filter, table, tr, td, i, j, txtValue, rowMatches;
+        input = document.getElementById("myInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("myTable");
+        tr = table.getElementsByTagName("tr");
+    
+        for (i = 1; i < tr.length; i++) { // Start from 1 to skip header row
+            tr[i].style.display = "none"; // Initially hide the row
+            td = tr[i].getElementsByTagName("td");
+            rowMatches = false;
+    
+            // Loop through all cells in the row
+            for (j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        rowMatches = true;
+                        break;
+                    }
+                }
+            }
+    
+            // If any cell in the row matches the filter, display the row
+            if (rowMatches) {
+                tr[i].style.display = "";
+            }
+        }
+    }
+    
+    </script>

@@ -95,6 +95,7 @@
                                                     <% } %>
                                                
                                                 <a href="/admin/dashboard/update/<%=item.type%>/<%= item.id %>/disapprove_calls" class="btn btn-danger">Disapprove</a>
+                                                <a href="/admin/dashboard/update/<%=item.type%>/<%= item.id %>/closed" class="btn btn-dark">Direct Close</a>
                                                 
                                                 
                                             </td>
@@ -179,9 +180,7 @@ function updateTable(data) {
         const actionsCell = document.createElement('td');
         actionsCell.innerHTML = `
             <a href="/admin/dashboard/update/slccall/${item.id}" class="btn btn-primary">Edit</a>`
-           if(item.status == 'waiting_for_parts'){
-            actionsCell.innerHTML+=`<a href="/admin/dashboard/partsAvailable/slccall/${item.id}" class="btn btn-secondary">Parts Available</a>`
-           }
+          
            actionsCell.innerHTML+=`<button class="btn btn-danger" onclick="deleteItem('slccall', ${item.id})">Delete</button>
            <a href="/admin/dashboard/print/slccall/${item.id}" class="btn btn-secondary">Print</a>
         `;

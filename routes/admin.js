@@ -90,7 +90,7 @@ pool.query(`select * from admin where email ='${body.email}' and password = '${b
 router.get('/dashboard',verify.adminAuthenticationToken,  async (req, res) => {
   try {
       const warranty_calls = `select count(id) as warranty_calls  from slccall where call_type = 'warranty_calls' and status= 'awaiting_onsite_visit';`
-      const amc_calls = `select count(id) as amc_calls from slccall where call_type = 'amc_calls' and status!= 'closed';`
+      const amc_calls = `select count(id) as amc_calls from slccall where call_type = 'amc_calls' and status= 'awaiting_onsite_visit';`
       const cc_calls = `select count(id) as cc_calls from cccall where status = 'awaiting_onsite_visit';`
       const engineer_onsite_calls = `select count(id) as engineer_onsite_calls  from slccall where status= 'onsite_calls';
 `;
@@ -112,9 +112,9 @@ FROM (
 const pending_ta = `
 SELECT COUNT(id) AS pending_ta 
 FROM (
-  SELECT id FROM cccall WHERE (status = 'pending_for_approval' or status = 'pending_cashout')
+  SELECT id FROM cccall WHERE (status = 'pending_for_approval')
   UNION ALL
-  SELECT id FROM slccall WHERE (status = 'pending_for_approval' or status = 'pending_cashout')
+  SELECT id FROM slccall WHERE (status = 'pending_for_approval')
 ) AS combined_calls;
 `;
 
@@ -130,9 +130,18 @@ FROM (
 
 
 
+const pending_cashout = `
+SELECT COUNT(id) AS pending_cashout 
+FROM (
+  SELECT id FROM cccall WHERE (status = 'pending_cashout')
+  UNION ALL
+  SELECT id FROM slccall WHERE (status = 'pending_cashout')
+) AS combined_calls;
+`;
+
 
     
-      const sqlQuery = warranty_calls + amc_calls + cc_calls + engineer_onsite_calls + parts_call + pending_ta + disapprove_calls ;
+      const sqlQuery = warranty_calls + amc_calls + cc_calls + engineer_onsite_calls + parts_call + pending_ta + disapprove_calls + pending_cashout ;
       const result = await queryAsync(sqlQuery);
 
 
