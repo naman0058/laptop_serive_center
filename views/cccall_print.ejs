@@ -78,26 +78,23 @@ body {
                     <td style="padding: 0 16px 18px 16px;">
                         <div style="text-align: center;">
                         <h2>
-                           Service Report </h2>
+                           Receipt/Invoice/Delivery Challan Copy </h2>
                            <h1 style="color: #1A1C21;font-size: 38PX;font-style: normal;font-weight: 800;line-height: normal;text-align: center;">
-                            TOTAL SYSTEM SOLUTION </h1>
+THE LAPTOP SERVICE CENTER </h1>
                             <h2 style="font-style: italic;">
-                                <%=result[0].brand.toUpperCase()%> AUTHORIZED SERVICE PROVIDER </h2>
                                
                                 <h3 style="font-weight: lighter;">
-                                    1st Floor, 357/3/a/475, Basanta Niketan, Opposite Kanchenjunga Stadium Gate No. 2, Ward No. 11, Siliguri, Darjeeling, 734001 </h3>
+                                    1st Floor, 357/3/a/475, Basanta Niketan, Bidhan Road, Siliguri, Darjeeling, 734001 </h3>
 
                                 </div>
                                     <div class="container">
                                         <div class="left-image">
                                             <img src="/images/logo.png" alt="Left Logo" style="width: 100px;">
                                         </div>
-                                        <div class="center-content">
+                                        <div class="right-image">
                                             <h3 style="font-weight: lighter;">Call Centre Tel: 8967727967 <br/>ROC NO.: 199005825C</h3>
                                         </div>
-                                        <div class="right-image" id="right-logo">
-                                            <img src="https://logo.clearbit.com/<%=result[0].brand%>.com" alt="Right Logo" style="width:100px">
-                                        </div>
+                                        
                                     </div>
                                     
             
@@ -122,9 +119,11 @@ body {
                                     </td>
 
                                     <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 35px;">
-                                        <p style="color: #5E6470;">Case ID : <%=result[0].brand_order_no%></p>
-                                        <p style="color: #5E6470;">Appointment / Schedule Date :  : <%=result[0].created_at%></p>
-                                        <p style="color: #5E6470;">Priority : </p>
+                                        <p style="color: #5E6470;">TSS Order No. : <%=result[0].tss_order_no%></p>
+                                        <p style="color: #5E6470;">Delivery Date : <%= new Date().getFullYear() %>-<%= (new Date().getMonth() + 1).toString().padStart(2, '0') %>-<%= new Date().getDate().toString().padStart(2, '0') %></p>                                    </p>
+                                        <p style="color: #5E6470;">Advance Payment : Rs. <%=result[0].advance%> </p>
+                                        <p style="color: #5E6470;">Service Charge : Rs. <%=result[0].service_charge%> </p>
+
 
                                     </td>
 
@@ -224,39 +223,7 @@ body {
                             </tbody>
                         </table>
 
-                        <p style="font-weight: 700; color: #1A1C21;">Site Details :</p>
-
-                        <table class="bordered-table" style="background-color:transparent; padding: 20px 16px;width: 100%; border-radius: 12px;font-size: 12px; line-height: 20px; table-layout: fixed;">
-
-                    
-                                </tr>
-
-
-                        <!-- <table class="bordered-table" style="max-width: 800px;"> -->
-                            <tr class="only-bordered-row">
-                                <td>Date of Engineer Visit :</td>
-                                <td></td>
-                                <td>Status of Site</td>
-                                <td>Dirty/Clean</td>
-                            </tr>
-
-                            <tr class="only-bordered-row">
-                                <td>Site Voltage Actual: </td>
-                                <td>Phase-neutral: </td>
-                                <td>Earth-phase:</td>
-                                <td>Earth-Neutral:</td>
-                            </tr>
-
-
-                            <tr class="only-bordered-row">
-                                <td>Recommended Voltage: </td>
-                                <td>Phase-neutral: 220-240 V </td>
-                                <td>Earth-Phase: 220-240 V</td>
-                                <td>Earth-Neutral: Less than 4V </td>
-                            </tr>
-
-                            </table>
-
+                        
 
                             <p style="font-weight: 700; color: #1A1C21;margin-top: 20px;">Spare Parts Replaced :</p>
 
@@ -324,16 +291,28 @@ body {
         </table>
 
 
+        <p style="font-weight: 700; color: #1A1C21;margin-top: 20px;">Terms & Conditions :</p>
 
-        <div class="row-container">
-            <p class="left">Date & Time Arrived : ......................</p>
-            <p class="right">Date & Time Completed : ...................</p>
-        </div>
+        <br/><p>1) This receipt should be produced at the time of collecting the equipment.</p>
+        <br/><p>2) Our estimated charges are only approximate based on initial inspection carried out. If during the process of repairs, additional spares are found necessary, they will be charged extra. No fresh approval will be taken for such additional spares used up to 20% in excess of the estimated amount.</p>
+       <br/> <br/><p>3) Acceptance of the equipment and completion of the job are subject to the availability of spares. If the equipment cannot be repaired due to non-availability of parts, the repair will not proceed.</p>
+        <br/><p>4) This equipment has been accepted for service subject to internal verification. Should we find the equipment has been tampered with, misused, or components removed, the equipment will be returned without repairs, and the customer will be informed within a reasonable time.</p>
+        <br/><p>5) Accessories are accepted under the owner's risk, and the company is not responsible for any accessories not recorded in the receipt.</p>
+        <br/><p>6) No warranty is extended for serviced equipment beyond 90 days, and the warranty is only for the replaced parts. (Applicable only for out-of-warranty services)</p>
+        <br/><p>7) The equipment should be collected from us within 15 days from the date of intimation.</p>
+        <br/><p>8) Once the current hardware/defective parts are replaced/fixed, defective parts are to be returned to TSS.</p>
+        <br/><p>9) The company assumes no responsibility whatsoever if the equipment is not collected within 28 days from the date of intimation.</p>
 
 
-        <div class="row-container" style="margin-top: 20px;">
-            <p class="left">Sign of the Engineer</p>
-            <p class="right">Sign and Stamp of the Customer</p>
+
+    
+
+
+        <div class="row-container" style="margin-top: 40px;">
+            <p class="left">Sign of Customer</p>
+            <p class="right">Sign of Customer for closer</p>
+            <p class="right">Sign of ASC Customer Service Agent</p>
+
         </div>
         
     </div>
@@ -391,14 +370,11 @@ const preloadImage = (url) => {
 
         async function downloadPDF() {
             // URL of the right logo
-            const rightLogoUrl = 'https://logo.clearbit.com/acer.com';
 
             try {
                 // Preload the right logo image
-                const loadedLogoUrl = await preloadImage(rightLogoUrl);
 
                 // Set the preloaded image source to the img element
-                document.getElementById('right-logo').src = loadedLogoUrl;
 
                 // Convert the content to PDF after image is loaded
                 const element = document.getElementById('content');

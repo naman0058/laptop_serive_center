@@ -67,6 +67,22 @@
                                                 <select class="form-control" id="<%= key %>" name="<%= key %>" required>
                                                     <option value="">Select <%= key.charAt(0).toUpperCase() + key.slice(1) %></option>
                                                 </select>
+                                            <% } else if (key === 'district') { %>
+                                                <select class="form-control" id="district" name="district">
+                                                    <option value="">Select District</option>
+                                                    <option value="cooch_behar">Cooch Behar</option>
+                                                    <option value="jalpaiguri">Jalpaiguri</option>
+                                                    <option value="alipuduar">Alipuduar</option>
+                                                    <option value="darjiling">Darjiling</option>
+                                                    <option value="siliguri">Siliguri</option>
+                                                    <option value="kalimpong">Kalimpong</option>
+                                                    <option value="north_dinajpur">North Dinajpur</option>
+                                                    <option value="malda">Malda</option>
+                                                    <option value="south_dinajpur">South Dinajpur</option>
+                                                    <option value="murshidabad">Murshidabad</option>
+                                                </select>
+                                                
+                                               
                                             <% } else { %>
                                                 <input 
                                                     type="<%= (key === 'image' || key === 'aadhar_card_image' || key === 'pan_card_image' || key === 'selfie' || key === 'qr_code') ? 'file' : 'text' %>" 
@@ -269,7 +285,7 @@ function updateTable(data) {
         const actionsCell = document.createElement('td');
         actionsCell.innerHTML = `
             
-           <a href="/admin/dashboard/print/slccall/${item.id}" class="btn btn-secondary">View Details</a>
+           <a href="/admin/dashboard/viewDetails/slccall/${item.id}" class="btn btn-secondary">View Details</a>
         <a href="/admin/dashboard/update/slccall/${item.id}" class="btn btn-primary">Edit</a>`
          
            actionsCell.innerHTML+=`<button class="btn btn-danger" onclick="deleteItem('slccall', ${item.id})">Delete</button>

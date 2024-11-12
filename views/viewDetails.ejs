@@ -222,7 +222,7 @@ body {
         </table>
 
 
-        
+        <% if(result[1][0]) { %>
            
         <% result[1].forEach(report => { %>
             
@@ -268,6 +268,7 @@ body {
             </div>
             <% } %>
           <% }) %>
+        
 
 
           <h3>Parts MEMO Report</h3>
@@ -288,7 +289,7 @@ body {
     </div>
 
 
-
+    <% } %>
   
       <!-- Modal for Image Zoom -->
       <div class="zoom-modal" id="zoomModal">

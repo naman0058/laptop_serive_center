@@ -78,9 +78,7 @@
                                                     value="<%= data[column] %>"
                                                     <%= column === 'pincode' ? "onchange=fetchLocation()" : '' %>  
                                                     <%= column === 'id' || column === 'tss_order_no' ? 'readonly' : '' %>
-                                                    <%= (column !== 'alternate_number' && column !== 'email' && column !== 'address' && column !== 'image' && column !== 'aadhar_card_image' && column !== 'pan_card_image' && column !== 'id' && column !== 'selfie' && column !== 'qr_code') ? 'required' : '' %> 
-                                                    <%= (column === 'city' || column === 'district' || column === 'tss_order_no') ? 'readonly required' : '' %>
-                                                    placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>"
+                                                     placeholder="<%= column.charAt(0).toUpperCase() + column.slice(1) %>"
                                                 >
                                             <% } %> 
                                         </div>

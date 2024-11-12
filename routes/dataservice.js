@@ -722,7 +722,14 @@ LEFT JOIN
                 console.error(err);
                 res.status(500).send("An error occurred while processing your request.");
             } else {
-                res.render('print', { type: req.params.type, result });
+                if(req.params.type =='cccall'){
+                    res.render('cccall_print', { type: req.params.type, result });
+
+                }
+                else{
+                    res.render('print', { type: req.params.type, result });
+
+                }
                 // res.json(result)
             }
         });
