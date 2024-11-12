@@ -48,7 +48,8 @@ function adminAuthenticationToken(req,res,next){
      next();
   }
   else {
-    res.render('login',{msg:'Wrong Credentials'})
+    // res.render('login',{msg:'Wrong Credentials'})
+    res.redirect('/admin/login')
     next()
   }
 }
