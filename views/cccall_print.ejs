@@ -24,6 +24,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    color: black;
 }
 
 .left-image, .right-image {
@@ -48,6 +49,7 @@ body {
 .only-bordered-row td {
     border: 1px solid black;
     text-align: center;
+    color:black
 }
 
 
@@ -57,6 +59,7 @@ body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    color: black;
 }
 
 .left {
@@ -68,15 +71,16 @@ body {
 }
 
 
+
     </style>
 </head>
 <body>
     <div id="content" style="max-width: 1200px;margin: auto;padding: 16px;border: 1px solid #eee;font-size: 16px;line-height: 24px;font-family: 'Inter', sans-serif;color: #555;background-color: #F9FAFC;">
-        <table style="font-size: 12px; line-height: 20px;">
+        <table style="font-size: 10px; line-height: 20px;">
             <thead>
                 <tr>
                     <td style="padding: 0 16px 18px 16px;">
-                        <div style="text-align: center;">
+                        <div style="text-align: center;color:black">
                         <h2>
                            Receipt/Invoice/Delivery Challan Copy </h2>
                            <h1 style="color: #1A1C21;font-size: 38PX;font-style: normal;font-weight: 800;line-height: normal;text-align: center;">
@@ -92,7 +96,7 @@ THE LAPTOP SERVICE CENTER </h1>
                                             <img src="/images/logo.png" alt="Left Logo" style="width: 100px;">
                                         </div>
                                         <div class="right-image">
-                                            <h3 style="font-weight: lighter;">Call Centre Tel: 8967727967 <br/>ROC NO.: 199005825C</h3>
+                                            <h3 style="font-weight: lighter;">Call Centre Tel: 8967727967 <br/>Email.: tss4india@gmail.com</h3>
                                         </div>
                                         
                                     </div>
@@ -106,23 +110,23 @@ THE LAPTOP SERVICE CENTER </h1>
             <tbody>
                 <tr>
                     <td>
-                        <table style="background-color:transparent; padding: 20px 16px;width: 100%; border-radius: 12px;font-size: 12px; line-height: 20px; table-layout: fixed;">
+                        <table style="margin-top:-30px;background-color:transparent; padding: 20px 16px;width: 100%; border-radius: 12px;font-size: 10px; line-height: 20px; table-layout: fixed;">
                             <tbody>
                                 <tr>
-                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 35px;">
+                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 10px;">
                                         <p style="font-weight: 700; color: #1A1C21;">Case Details</p>
-                                        <p style="color: #5E6470;">Service Type : <%=result[0].type%></p>
-                                        <p style="color: #5E6470;">Service Created Date : <%=result[0].created_at%></p>
+                                        <p style="color: black;">Service Type : <%=result[0].type%></p>
+                                        <p style="color: black;">Service Created Date : <%=result[0].created_at%></p>
 
                                        
 
                                     </td>
 
-                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 35px;">
-                                        <p style="color: #5E6470;">TSS Order No. : <%=result[0].tss_order_no%></p>
-                                        <p style="color: #5E6470;">Delivery Date : <%= new Date().getFullYear() %>-<%= (new Date().getMonth() + 1).toString().padStart(2, '0') %>-<%= new Date().getDate().toString().padStart(2, '0') %></p>                                    </p>
-                                        <p style="color: #5E6470;">Advance Payment : Rs. <%=result[0].advance%> </p>
-                                        <p style="color: #5E6470;">Service Charge : Rs. <%=result[0].service_charge%> </p>
+                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 10px;">
+                                        <p style="color: black;">TSS Order No. : <%=result[0].tss_order_no%></p>
+                                        <p style="color: black;">Delivery Date : <%= new Date().getFullYear() %>-<%= (new Date().getMonth() + 1).toString().padStart(2, '0') %>-<%= new Date().getDate().toString().padStart(2, '0') %></p>                                    </p>
+                                        <p style="color: black;">Advance Payment : Rs. <%=result[0].advance%> </p>
+                                        <p style="color: black;">Service Charge : Rs. <%=result[0].service_charge%> </p>
 
 
                                     </td>
@@ -135,21 +139,21 @@ THE LAPTOP SERVICE CENTER </h1>
 
 
                                 <tr>
-                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 35px;">
+                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 10px;">
                                         <p style="font-weight: 700; color: #1A1C21;">Customer Info</p>
-                                        <p style="color: #5E6470;">Name : <%=result[0].name%></p>
-                                        <p style="color: #5E6470;">Site Address : <%=result[0].address%></p>
+                                        <p style="color: black;">Name : <%=result[0].name%></p>
+                                        <p style="color: black;">Site Address : <%=result[0].address%></p>
+                                        <p style="color: black;">Product Description : <%=result[0].system_type%></p>
 
                                        
 
                                     </td>
 
-                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 15px;">
-                                        <p style="color: #5E6470;">Tel : </p>
-                                        <p style="color: #5E6470;">Mobile  : <%=result[0].number%></p>
-                                        <p style="color: #5E6470;">Contact No. : <%=result[0].alternate_number%></p>
-                                        <p style="color: #5E6470;">Email : <%=result[0].email%></p>
-                                        <p style="color: #5E6470;">Product Description : <%=result[0].system_type%></p>
+                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 10px;">
+                                        <p style="color: black;">Tel : </p>
+                                        <p style="color: black;">Mobile  : <%=result[0].number%></p>
+                                        <p style="color: black;">Contact No. : <%=result[0].alternate_number%></p>
+                                        <p style="color: black;">Email : <%=result[0].email%></p>
 
 
                                     </td>
@@ -162,17 +166,17 @@ THE LAPTOP SERVICE CENTER </h1>
 
 
                                 <tr>
-                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 35px;">
+                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 10px;">
                                         <p style="font-weight: 700; color: #1A1C21;">Product Details</p>
-                                        <p style="color: #5E6470;">Model : <%=result[0].model%></p>
+                                        <p style="color: black;">Model : <%=result[0].model%></p>
 
                                        
 
                                     </td>
 
-                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 35px;">
-                                        <p style="color: #5E6470;">.</p>
-                                        <p style="color: #5E6470;">Serial No. : <%=result[0].sn%> </p>
+                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 10px;">
+                                        <p style="color: black;">.</p>
+                                        <p style="color: black;">Serial No. : <%=result[0].sn%> </p>
 
                                       
 
@@ -187,9 +191,9 @@ THE LAPTOP SERVICE CENTER </h1>
 
 
                                 <tr>
-                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 15px;">
+                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 10px;">
                                         <p style="font-weight: 700; color: #1A1C21;">Problem Description</p>
-                                        <p style="color: #5E6470;"> <%=result[0].issue%></p>
+                                        <p style="color: black;"> <%=result[0].issue%></p>
 
                                        
 
@@ -200,7 +204,7 @@ THE LAPTOP SERVICE CENTER </h1>
 
 
                                 <tr>
-                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 5px;">
+                                    <td style="vertical-align: top; width: 30%; padding-right: 20px;padding-bottom: 10px;">
                                         <p style="font-weight: 700; color: #1A1C21;">Diagnosis Repair Details</p>
 
                                     </td>
@@ -225,11 +229,11 @@ THE LAPTOP SERVICE CENTER </h1>
 
                         
 
-                            <p style="font-weight: 700; color: #1A1C21;margin-top: 20px;">Spare Parts Replaced :</p>
+                            <p style="font-weight: 700; color: #1A1C21;margin-top: 10px;">Spare Parts Replaced :</p>
 
 
 
-                            <table class="bordered-table" style="background-color:transparent; padding: 20px 16px;width: 100%; border-radius: 12px;font-size: 12px; line-height: 20px; table-layout: fixed;">
+                            <table class="bordered-table" style="background-color:transparent; padding: 20px 16px;width: 100%; border-radius: 12px;font-size: 10px; line-height: 20px; table-layout: fixed;">
 
                     
                             </tr>
@@ -254,7 +258,7 @@ THE LAPTOP SERVICE CENTER </h1>
 
 
 
-                        <table style="margin-top:60px;background-color:transparent; padding: 20px 16px;width: 100%; border-radius: 12px;font-size: 12px; line-height: 20px; table-layout: fixed;">
+                        <table style="margin-top:60px;background-color:transparent; padding: 20px 16px;width: 100%; border-radius: 12px;font-size: 10px; line-height: 20px; table-layout: fixed;">
 
                             <tr>
                                 <td colspan="3">
@@ -291,27 +295,27 @@ THE LAPTOP SERVICE CENTER </h1>
         </table>
 
 
-        <p style="font-weight: 700; color: #1A1C21;margin-top: 20px;">Terms & Conditions :</p>
+        <p style="font-weight: 700; color: #1A1C21;margin-top: -40px;font-size: 12px;">Terms & Conditions :</p>
 
-        <br/><p>1) This receipt should be produced at the time of collecting the equipment.</p>
-        <br/><p>2) Our estimated charges are only approximate based on initial inspection carried out. If during the process of repairs, additional spares are found necessary, they will be charged extra. No fresh approval will be taken for such additional spares used up to 20% in excess of the estimated amount.</p>
-       <br/> <br/><p>3) Acceptance of the equipment and completion of the job are subject to the availability of spares. If the equipment cannot be repaired due to non-availability of parts, the repair will not proceed.</p>
-        <br/><p>4) This equipment has been accepted for service subject to internal verification. Should we find the equipment has been tampered with, misused, or components removed, the equipment will be returned without repairs, and the customer will be informed within a reasonable time.</p>
-        <br/><p>5) Accessories are accepted under the owner's risk, and the company is not responsible for any accessories not recorded in the receipt.</p>
-        <br/><p>6) No warranty is extended for serviced equipment beyond 90 days, and the warranty is only for the replaced parts. (Applicable only for out-of-warranty services)</p>
-        <br/><p>7) The equipment should be collected from us within 15 days from the date of intimation.</p>
-        <br/><p>8) Once the current hardware/defective parts are replaced/fixed, defective parts are to be returned to TSS.</p>
-        <br/><p>9) The company assumes no responsibility whatsoever if the equipment is not collected within 28 days from the date of intimation.</p>
+        <p style="font-size: 10px;">1) This receipt should be produced at the time of collecting the equipment.</p>
+       <p style="font-size: 10px;">2) Our estimated charges are only approximate based on initial inspection carried out. If during the process of repairs, additional spares are found necessary, they will be charged extra. No fresh approval will be taken for such additional spares used up to 20% in excess of the estimated amount.</p>
+       <p style="font-size: 10px;">3) Acceptance of the equipment and completion of the job are subject to the availability of spares. If the equipment cannot be repaired due to non-availability of parts, the repair will not proceed.</p>
+       <p style="font-size: 10px;">4) This equipment has been accepted for service subject to internal verification. Should we find the equipment has been tampered with, misused, or components removed, the equipment will be returned without repairs, and the customer will be informed within a reasonable time.</p>
+       <p style="font-size: 10px;">5) Accessories are accepted under the owner's risk, and the company is not responsible for any accessories not recorded in the receipt.</p>
+       <p style="font-size: 10px;">6) No warranty is extended for serviced equipment beyond 90 days, and the warranty is only for the replaced parts. (Applicable only for out-of-warranty services)</p>
+       <p style="font-size: 10px;">7) The equipment should be collected from us within 15 days from the date of intimation.</p>
+       <p style="font-size: 10px;">8) Once the current hardware/defective parts are replaced/fixed, defective parts are to be returned to TSS.</p>
+       <p style="font-size: 10px;">9) The company assumes no responsibility whatsoever if the equipment is not collected within 28 days from the date of intimation.</p>
 
 
 
     
 
 
-        <div class="row-container" style="margin-top: 40px;">
-            <p class="left">Sign of Customer</p>
-            <p class="right">Sign of Customer for closer</p>
-            <p class="right">Sign of ASC Customer Service Agent</p>
+        <div class="row-container" style="margin-top: 15px;">
+            <p class="left" style="font-size: 12px;">Sign of Customer</p>
+            <p class="right" style="font-size: 12px;">Sign of Customer for closer</p>
+            <p class="right"style="font-size: 12px;">Sign of ASC Customer Service Agent</p>
 
         </div>
         

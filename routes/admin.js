@@ -109,6 +109,21 @@ FROM (
 `;
 
 
+const district_wise =  `SELECT district, COUNT(id) AS count 
+FROM (
+  SELECT district, id FROM cccall 
+  WHERE (status != 'closed') 
+
+  UNION ALL
+
+  SELECT district, id FROM slccall 
+    WHERE (status != 'closed') 
+) AS combined_calls
+GROUP BY district
+ORDER BY district;
+`
+
+
 const pending_ta = `
 SELECT COUNT(id) AS pending_ta 
 FROM (
@@ -141,7 +156,7 @@ FROM (
 
 
     
-      const sqlQuery = warranty_calls + amc_calls + cc_calls + engineer_onsite_calls + parts_call + pending_ta + disapprove_calls + pending_cashout ;
+      const sqlQuery = warranty_calls + amc_calls + cc_calls + engineer_onsite_calls + parts_call + pending_ta + disapprove_calls + pending_cashout + district_wise ;
       const result = await queryAsync(sqlQuery);
 
 

@@ -176,7 +176,12 @@ function generatePageHeader(name, status) {
 
 
 
-
+router.get('/deliveryDone/:type/:id',(req,res)=>{
+    pool.query(`update cccall set updated_at = ${verify.getCurrentDate()} , isdeliver = 'done' where id = '${req.params.id}'`,(err,result)=>{
+        if(err) throw err;
+        else res.redirect('/admin/dashboard/list/cccall/closed')
+    })
+})
 
 
 router.get('/new/:name',verify.adminAuthenticationToken , (req, res) => {
@@ -189,7 +194,7 @@ router.get('/new/:name',verify.adminAuthenticationToken , (req, res) => {
             throw err;
         } else {
             const columnNames = columns.map(column => column.COLUMN_NAME)
-                                       .filter(name => !['status', 'created_at', 'id' , 'updated_at', 'assign_engineer', 'type'].includes(name));
+                                       .filter(name => !['status', 'created_at', 'id' , 'updated_at', 'assign_engineer', 'type' , 'isdeliver'].includes(name));
 
             res.render('add', {
                 columns: columnNames,

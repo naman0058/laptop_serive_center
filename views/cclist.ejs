@@ -180,6 +180,13 @@
                                                 <a href="/admin/dashboard/update/<%= name %>/<%= item.id %>" class="btn btn-primary">Edit</a>
                                                
                                                 <button class="btn btn-danger" onclick="deleteItem('<%= name %>', <%= item.id %>)">Delete</button>
+
+                                                <% if(!item.isdeliver) { %>
+
+                                                    <a href="/admin/dashboard/deliveryDone/<%= name %>/<%= item.id %>" class="btn btn-success">Delivery Done</a>
+
+                                                    <% }  %>
+
                                                 <a href="/admin/dashboard/print/<%= name %>/<%= item.id %>" class="btn btn-dark">Print</a>
                                            
                                             </td>

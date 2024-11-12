@@ -104,6 +104,25 @@
       </div>
     </div>
   </div>
+
+
+  <p>District Wise Calls</p>
+  <div class="row">
+
+    <% for(i=0;i<result[8].length;i++) { %>
+    <div class="col-lg-3 col-md-6">
+      <div class="card card-block card-stretch card-height">
+        <div class="card-body">
+          <div class="mb-2 d-flex justify-content-between align-items-center">
+            <span class="text-dark"><%=result[8][i].district%></span>
+            
+          </div>
+          <h2 class="counter"><%= result[8][i].count %></h2>
+        </div>
+      </div>
+    </div>
+   <% } %>
+  </div>
 </div>
 
 <!-- Footer Section Start -->
