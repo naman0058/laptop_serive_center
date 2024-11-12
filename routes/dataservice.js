@@ -713,7 +713,7 @@ LEFT JOIN
 
     
   
-    router.get('/print/:type/:id', verify.adminAuthenticationToken, (req, res) => {
+    router.get('/print/:type/:id', (req, res) => {
         pool.query(`SELECT * FROM ${req.params.type} WHERE id = ?`, [req.params.id], (err, result) => {
             if (err) {
                 console.error(err);
