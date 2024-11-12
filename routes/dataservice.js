@@ -224,52 +224,44 @@ router.get('/new/:name',verify.adminAuthenticationToken , (req, res) => {
 
 
 
-router.post('/insert', upload.fields([ { name: 'image', maxCount: 1 },
-    { name: 'aadhar_card_image', maxCount: 1 } , {name:'pan_card_image' , maxCount : 1} , {name:'selfie' , maxCount:1} , {name:'qr_code' , maxCount:1}]), async (req, res) => {
-    const { body, params, files } = req;
-    // const { name } = params;
+router.post('/insert', upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'aadhar_card_image', maxCount: 1 },
+    { name: 'pan_card_image', maxCount: 1 },
+    { name: 'selfie', maxCount: 1 },
+    { name: 'qr_code', maxCount: 1 }
+]), async (req, res) => {
+    const { body, files } = req;
 
     try {
+        // Set default values
         body.created_at = verify.getCurrentDate();
         body.updated_at = verify.getCurrentDate();
-        body.status = 'open'
+        body.status = 'open';
 
-        if (files && files['image']) {
-            body.image = req.files['image'][0].filename;
-        }
+        // Handle file uploads
+        if (files && files['image']) body.image = files['image'][0].filename;
+        if (files && files['aadhar_card_image']) body.aadhar_card_image = files['aadhar_card_image'][0].filename;
+        if (files && files['pan_card_image']) body.pan_card_image = files['pan_card_image'][0].filename;
+        if (files && files['selfie']) body.selfie = files['selfie'][0].filename;
+        if (files && files['qr_code']) body.qr_code = files['qr_code'][0].filename;
 
-        if (files && files['aadhar_card_image']) {
-            body.aadhar_card_image = req.files['aadhar_card_image'][0].filename;
-        }
-
-
-        if (files && files['pan_card_image']) {
-            body.pan_card_image = req.files['pan_card_image'][0].filename;
-        }
-
-        if (files && files['selfie']) {
-            body.selfie = req.files['selfie'][0].filename;
-        }
-
-        if (files && files['qr_code']) {
-            body.qr_code = req.files['qr_code'][0].filename;
-        }
-
-
+        // Insert data into the specified table
         await queryAsync(`INSERT INTO ${req.body.type} SET ?`, body);
 
-
-        if(req.body.type == 'addcash'){
-            pool.query(`update engineer set balance = balance + '${parseInt(req.body.amount)}' where name = '${req.body.engineer}'`,(err,result)=>{
-                if(err) throw err;
-                else{
-
-        res.redirect(`/admin/dashboard/new/${encodeURIComponent(req.body.type)}?message=${encodeURIComponent('Saved Successfully')}`);
-    }
-            })
+        // Additional logic for 'addcash' type
+        if (req.body.type === 'addcash') {
+            pool.query(`UPDATE engineer SET balance = balance + ? WHERE name = ?`, [parseInt(req.body.amount), req.body.engineer], (err) => {
+                if (err) {
+                    throw err;
+                }
+                // Redirect only after successful update
+                res.redirect(`/admin/dashboard/new/${encodeURIComponent(req.body.type)}?message=${encodeURIComponent('Saved Successfully')}`);
+            });
+        } else {
+            // Redirect for non-'addcash' types
+            res.redirect(`/admin/dashboard/new/${encodeURIComponent(req.body.type)}?message=${encodeURIComponent('Saved Successfully')}`);
         }
-        res.redirect(`/admin/dashboard/new/${encodeURIComponent(req.body.type)}?message=${encodeURIComponent('Saved Successfully')}`);
-
     } catch (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
