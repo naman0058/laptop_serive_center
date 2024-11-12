@@ -989,7 +989,7 @@ WHERE
 
   router.get('/viewDetails/:type/:id',verify.adminAuthenticationToken, (req, res) => {
     var query = `SELECT * FROM ${req.params.type} WHERE id = '${req.params.id}';`
-    var query1 = `select * from callsUpdate where callid = ${req.params.id} and type = '${req.params.type}';`
+    var query1 = `select * from callsUpdate where callid = ${req.params.id} and type = '${req.params.type}' order by id desc limit 1;`
     
     pool.query(query+query1, (err, result) => {
         if (err) {
